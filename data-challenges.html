@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Chatbot Learning Scenarios - Blog Summary</title>
+  <meta name="description" content="Summary of handling missing, noisy, and imbalanced data challenges in machine learning based solely on an AI chat interaction.">
+  <meta property="og:title" content="AI Chatbot Learning Scenarios - Blog Summary"/>
+  <meta property="og:description" content="Summary of handling missing, noisy, and imbalanced data challenges in machine learning based solely on an AI chat interaction."/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:locale" content="en_US"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css"/>
+  <style>
+    :root {
+      --radius:1rem;
+      --shadow:0 25px 50px rgba(0,0,0,0.08);
+      --transition:.3s cubic-bezier(.4,.2,.2,1);
+      --brand:#6366f1;
+      --bg-light: radial-gradient(circle at top left,#f0f9ff,#e0f2fe);
+      --bg-dark: radial-gradient(circle at top left,#0f172a,#1e293b);
+      --card-light: rgba(255,255,255,0.85);
+      --card-dark: rgba(30,41,59,0.85);
+      --panel-light: #f3f4f6;
+      --panel-dark: rgba(41,50,65,0.9);
+      --text-light: #1e293b;
+      --text-dark: #e2e8f0;
+      --muted-light: #475569;
+      --muted-dark: #94a3b8;
+    }
+    * {box-sizing:border-box;}
+    body {
+      margin:0;
+      font-family:'Inter',sans-serif;
+      background: var(--bg-light);
+      color: var(--text-light);
+      padding:2rem 2rem 2rem 14rem;
+      line-height:1.5;
+      transition:background var(--transition),color var(--transition);
+    }
+    .dark-mode {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+    h1 { font-size:2.6rem; margin:0; display:flex; align-items:center; gap:.5rem;
+         background:-webkit-linear-gradient(90deg,#0ea5e9,#8b5cf6);
+         -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    h2 { margin-top:1.75rem; font-size:1.75rem; }
+    h3 { margin-top:1rem; font-size:1.25rem; }
+    p { margin:.85rem 0; }
+    ul { margin:6px 0 12px 20px; }
+    a { color: inherit; }
+    .skip-link {
+      position: absolute;
+      top:8px;
+      left:8px;
+      background:#1e293b;
+      color:#fff;
+      padding:6px 12px;
+      border-radius:6px;
+      font-size:.75rem;
+      text-decoration:none;
+      z-index:1000;
+      transform:translateY(-100%);
+      transition:transform .2s ease;
+    }
+    .skip-link:focus { transform:translateY(0); }
+    .sidebar {
+      position:fixed;
+      top:2rem;
+      left:2rem;
+      width:220px;
+      background:rgba(255,255,255,0.95);
+      border-radius:1rem;
+      padding:1.25rem;
+      box-shadow:0 20px 40px rgba(0,0,0,0.08);
+      font-size:.9rem;
+      z-index:200;
+      backdrop-filter:blur(8px);
+      transition:background var(--transition),color var(--transition);
+    }
+    .sidebar h3 { margin-top:0; font-size:1rem; margin-bottom:.5rem; }
+    .sidebar a {
+      display:block;
+      padding:.4rem .5rem;
+      text-decoration:none;
+      color:#334155;
+      font-weight:500;
+      border-radius:.35rem;
+      margin-bottom:4px;
+      transition: all .2s;
+    }
+    .sidebar a.active { background:rgba(99,102,241,0.1); color:#6366f1; font-weight:600; }
+    .sidebar a:hover { padding-left:.75rem; background:rgba(224,242,254,0.6); }
+    .container {
+      max-width:1100px;
+      margin:0 auto;
+      background:rgba(255,255,255,0.35);
+      backdrop-filter:blur(12px);
+      border-radius:1rem;
+      padding:2.5rem 3rem;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+      transition:background var(--transition),color var(--transition);
+    }
+    .dark-mode .sidebar { background: rgba(30,41,59,0.9); }
+    .dark-mode .sidebar a { color: #cbd5e1; }
+    .dark-mode .sidebar a.active { background: rgba(59,130,246,0.15); color:#7dd3fc; }
+    .dark-mode .container { background: var(--card-dark); }
+    .badge {
+      display:inline-block;
+      background: var(--brand);
+      color:#fff;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:.65rem;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin-right:6px;
+    }
+    .intro {
+      background: var(--card-light);
+      padding:1.5rem 1.75rem;
+      border-radius:.85rem;
+      box-shadow:0 20px 50px rgba(99,102,241,0.1);
+      margin-bottom:1.5rem;
+      border-left:6px solid #8b5cf6;
+      position:relative;
+      transition:background var(--transition),color var(--transition);
+    }
+    .dark-mode .intro { background: var(--panel-dark); }
+    .tl-dr {
+      display:flex;
+      flex-wrap:wrap;
+      gap:1rem;
+      margin-top:1rem;
+    }
+    .tl-dr .card {
+      flex:1 1 200px;
+      background:rgba(243,244,246,0.95);
+      padding:1rem;
+      border-radius:.75rem;
+      position:relative;
+      border:1px solid rgba(99,102,241,0.15);
+      font-size:.9rem;
+      transition: background .2s, color .2s;
+    }
+    .dark-mode .tl-dr .card {
+      background: rgba(41,50,65,0.95);
+      border:1px solid rgba(125,211,252,0.5);
+      color: var(--text-dark);
+    }
+    .scenario {
+      background: var(--card-light);
+      border-radius:.85rem;
+      padding:1.5rem 1.75rem;
+      margin-bottom:1.5rem;
+      box-shadow:0 16px 40px rgba(30,41,59,0.06);
+      position:relative;
+      transition:background var(--transition),color var(--transition);
+    }
+    .dark-mode .scenario { background: var(--panel-dark); }
+    .scenario .title {
+      display:flex;
+      align-items:center;
+      gap:.75rem;
+      font-weight:600;
+      font-size:1.3rem;
+      margin-bottom:8px;
+    }
+    .scenario-border-1 { border-left:6px solid #3b82f6; }
+    .scenario-border-2 { border-left:6px solid #facc15; }
+    .scenario-border-3 { border-left:6px solid #f87171; }
+    .placeholder-graphic {
+      border:2px dashed rgba(99,102,241,0.5);
+      border-radius:.6rem;
+      padding:1rem;
+      margin:1rem 0;
+      font-size:.85rem;
+      background:rgba(250,250,252,0.8);
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100px;
+      transition:background var(--transition), color .2s;
+    }
+    .dark-mode .placeholder-graphic {
+      background: rgba(41,50,65,0.6);
+      border-color: rgba(125,211,252,0.7);
+      color: var(--text-dark);
+    }
+    .caption {
+      font-size:.65rem;
+      color: var(--muted-light);
+      margin-top:4px;
+    }
+    .dark-mode .caption { color: var(--muted-dark); }
+    .collapsible {
+      border:1px solid rgba(99,102,241,0.2);
+      border-radius:.5rem;
+      overflow:hidden;
+      margin-top:6px;
+    }
+    .collapsible-header {
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      background:rgba(243,244,246,0.9);
+      padding:8px 12px;
+      cursor:pointer;
+      font-weight:600;
+      user-select:none;
+      transition: background .2s;
+    }
+    .dark-mode .collapsible-header { background: rgba(41,50,65,0.9); }
+    .collapsible-body {
+      padding:12px;
+      display:none;
+      background:#fff;
+      transition: background .2s;
+    }
+    .dark-mode .collapsible-body { background: rgba(30,41,59,0.7); color: var(--text-dark); }
+    .takeaways-wrapper {
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+      gap:1rem;
+      margin-top:8px;
+    }
+    .takeaway {
+      background:linear-gradient(135deg,#a5b4fc,#f0abfc);
+      padding:1rem;
+      border-radius:.75rem;
+      font-size:.8rem;
+      color:#1f2d55;
+      box-shadow:0 14px 40px rgba(163,140,255,0.25);
+      transition: background .2s, color .2s;
+    }
+    .applied-grid {
+      display:grid;
+      gap:1rem;
+      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      margin-top:1rem;
+    }
+    .applied-card {
+      background:rgba(255,255,255,0.9);
+      border-radius:.75rem;
+      padding:1rem;
+      border:1px solid rgba(99,102,241,0.15);
+      transition: background .2s, color .2s;
+    }
+    .dark-mode .applied-card { background: rgba(41,50,65,0.9); border:1px solid rgba(125,211,252,0.4); }
+    .topic-label {
+      font-size:.6rem;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin-bottom:4px;
+      display:inline-block;
+      color:#6366f1;
+      font-weight:600;
+    }
+    .version-stamp {
+      font-size:.6rem;
+      margin-top:4px;
+      color:#475569;
+    }
+    .download-btn {
+      background: var(--brand);
+      color: white;
+      border: none;
+      padding:8px 16px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:600;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      transition: filter .2s;
+    }
+    .download-btn:hover { filter:brightness(1.05); }
+    .theme-toggle {
+      position:fixed;
+      top:1rem;
+      right:1.5rem;
+      z-index:500;
+      background:white;
+      border:1px solid #cbd5e1;
+      padding:.5rem 1rem;
+      border-radius:9999px;
+      cursor:pointer;
+      font-weight:600;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.08);
+      font-size:.9rem;
+      transition: all .2s;
+    }
+    .theme-toggle:hover { transform:translateY(-1px); }
+    #progress-bar {
+      position:fixed;
+      top:0;
+      left:0;
+      height:6px;
+      background: linear-gradient(to right,#6366f1,#d946ef);
+      width:0%;
+      border-radius:0 0 4px 0;
+      z-index:999;
+      transition: width .2s ease-out;
+    }
+    .decorative {
+      position:absolute;
+      top:-25px;
+      right:-25px;
+      background: rgba(99,102,241,0.1);
+      padding:1rem 1.2rem;
+      border-radius:50%;
+      font-size:2rem;
+      color: rgba(99,102,241,0.3);
+      pointer-events:none;
+    }
+    footer {
+      margin-top:2.5rem;
+      font-size:.75rem;
+      display:flex;
+      flex-wrap:wrap;
+      gap:1rem;
+    }
+    .faint { opacity:.6; }
+    @media (max-width:1150px){
+      body { padding-left:2rem; }
+      .sidebar { position: relative; width:100%; }
+      .container { padding:2rem 1.5rem; }
+    }
+    @media print {
+      body { background:#fff; padding:1rem; }
+      .sidebar, .theme-toggle, #progress-bar { display:none !important; }
+      .intro, .scenario { background:#fff; box-shadow:none; }
+      .placeholder-graphic { display:none; }
+      a { text-decoration:none; color:black; }
+    }
+  </style>
+</head>
+<body>
+  <div id="progress-bar" aria-hidden="true"></div>
+  <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
+    <span class="theme-icon">🌙</span> Toggle Theme
+  </button>
+
+  <div class="sidebar" aria-label="Table of contents">
+    <h3>On this page</h3>
+    <a href="#overview" class="active">Overview</a>
+    <a href="#missing">Missing Data</a>
+    <a href="#noisy">Noisy Data</a>
+    <a href="#imbalanced">Imbalanced Data</a>
+    <a href="#takeaways">Takeaways</a>
+    <a href="#applied">Applied Uses</a>
+    <a href="#reflection">Reflection</a>
+  </div>
+
+  <main class="container" id="content" aria-label="Blog summary of data challenges">
+    <div class="decorative" aria-hidden="true"><i class="fas fa-lightbulb"></i></div>
+
+    <header id="overview" data-aos="fade-down" data-aos-delay="100">
+      <h1><i class="fas fa-robot"></i> Lessons from a "Data Challenges" Dialogue</h1>
+      <p style="margin-top:6px;">I explored three machine learning data challenges: missing data, noisy data, and imbalanced datasets, through structured discussion with an AI. This blog introduces each topic, captures the approaches that were agreed upon in the conversation, and highlights concrete actions and takeaways. All content is sourced directly from that interaction.</p>
+      <div class="tl-dr" aria-label="Quick summary">
+        <div class="card" data-aos="fade-up" data-aos-delay="150">
+          <div style="font-weight:600; margin-bottom:4px;">What I did</div>
+          <div>Worked through three ML data challenges with an AI, diagnosing before applying fixes and selecting context-aware techniques.</div>
+        </div>
+        <div class="card" data-aos="fade-up" data-aos-delay="200">
+          <div style="font-weight:600; margin-bottom:4px;">What I learned</div>
+          <div>Missingness can be meaningful, noise might hide signal, and imbalance requires careful correction beyond accuracy.</div>
+        </div>
+        <div class="card" data-aos="fade-up" data-aos-delay="250">
+          <div style="font-weight:600; margin-bottom:4px;">What’s next</div>
+          <div>Build lightweight diagnostics into preprocessing, validate synthetic data with statistical and expert checks, and compare alternative handling strategies before settling on one.</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="intro" data-aos="fade-up" data-aos-delay="300">
+      <div class="badge">Context</div>
+      <p>Each topic reflects a common preprocessing challenge in machine learning. Rather than applying blanket fixes, the discussion emphasized understanding the nature of the data issue, when to interpolate versus extrapolate, how to distinguish harmful noise from informative deviations, and how to prevent a model from being skewed by class imbalance. Below are the distilled decisions and suggested actions.</p>
+    </div>
+
+    <!-- Missing Data -->
+    <section id="missing" data-aos="fade-up" data-aos-delay="350">
+      <div class="scenario scenario-border-1" aria-labelledby="missing-title">
+        <div class="title" id="missing-title"><i class="fas fa-hole"></i> Missing Data</div>
+        <p><strong>Introduction:</strong> In machine learning, absent values can degrade model quality if not handled with context. The conversation began by asking whether missingness should be ignored, deleted, interpolated, or extrapolated.</p>
+        <div class="placeholder-graphic" aria-label="Example scenario placeholder">
+          <div><strong>Example:</strong> Time series gaps suggest extrapolation when trends are consistent; isolated missing entries filled with mean/median interpolation.</div>
+        </div>
+        <p><strong>Discussed approaches:</strong></p>
+        <ul>
+          <li>Assess whether missing values are important, redundant, or ignorable before intervening.</li>
+          <li>Use extrapolation primarily in time series or similar ordered data where prior trends justify predicting beyond observed ranges.</li>
+          <li>Fill gaps with interpolation using mean, median, or mode when appropriate.</li>
+        </ul>
+        <div class="collapsible" data-topic="missing">
+          <div class="collapsible-header" role="button" aria-expanded="false">
+            <div>Actions to take</div>
+            <div><i class="fas fa-chevron-down"></i></div>
+          </div>
+          <div class="collapsible-body">
+            <ul>
+              <li>Evaluate the nature of missingness before applying any transformation.</li>
+              <li>Apply extrapolation only with trend support.</li>
+              <li>Use simple statistical interpolation for local gaps.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Noisy Data -->
+    <section id="noisy" data-aos="fade-up" data-aos-delay="400">
+      <div class="scenario scenario-border-2" aria-labelledby="noisy-title">
+        <div class="title" id="noisy-title"><i class="fas fa-wave-square"></i> Noisy Data</div>
+        <p><strong>Introduction:</strong> Noise in features can obscure true patterns or be mistaken for anomalies. The key was to decide when to remove outliers and when to retain or smooth fluctuations based on the problem.</p>
+        <div class="placeholder-graphic" aria-label="Example scenario placeholder">
+          <div><strong>Example:</strong> Using moving averages to smooth jitter while checking that important deviations are not lost; combining statistical filters with model-based detection.</div>
+        </div>
+        <p><strong>Discussed approaches:</strong></p>
+        <ul>
+          <li>Consider outlier removal but evaluate its appropriateness based on the specific ML task.</li>
+          <li>Reduce random fluctuations with smoothing techniques like moving averages to clarify underlying trends.</li>
+          <li>Use machine learning models to learn normal behavior and flag deviations that might be structured noise or true anomalies.</li>
+        </ul>
+        <div class="collapsible" data-topic="noisy">
+          <div class="collapsible-header" role="button" aria-expanded="false">
+            <div>Actions to take</div>
+            <div><i class="fas fa-chevron-down"></i></div>
+          </div>
+          <div class="collapsible-body">
+            <ul>
+              <li>Balance noise reduction with potential signal loss.</li>
+              <li>Combine statistical filtering and smoothing for clearer inputs.</li>
+              <li>Leverage model-based detection for subtle patterns.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Imbalanced Data -->
+    <section id="imbalanced" data-aos="fade-up" data-aos-delay="450">
+      <div class="scenario scenario-border-3" aria-labelledby="imbalanced-title">
+        <div class="title" id="imbalanced-title"><i class="fas fa-balance-scale"></i> Imbalanced Datasets</div>
+        <p><strong>Introduction:</strong> When one class dominates, models can appear accurate while failing on minority cases. The discussion focused on rebalancing and algorithmic adjustments to surface and correct that bias.</p>
+        <div class="placeholder-graphic" aria-label="Example scenario placeholder">
+          <div><strong>Example:</strong> Healthy vs disease classification—naive accuracy hides minority failure; use sampling, SMOTE, class weights, and ensembles.</div>
+        </div>
+        <p><strong>Discussed approaches:</strong></p>
+        <ul>
+          <li>Under-sample the majority or gather more minority-class examples to reduce skew.</li>
+          <li>Generate synthetic minority samples with SMOTE by interpolating between existing ones.</li>
+          <li>Adjust algorithmic penalties through class weights to emphasize minority misclassification.</li>
+          <li>Use ensemble methods like balanced random forests or boosting to aggregate imbalance-aware models.</li>
+        </ul>
+        <div class="collapsible" data-topic="imbalanced">
+          <div class="collapsible-header" role="Button" aria-expanded="false">
+            <div>Actions to take</div>
+            <div><i class="fas fa-chevron-down"></i></div>
+          </div>
+          <div class="collapsible-body">
+            <ul>
+              <li>Rebalance via sampling or additional minority data collection.</li>
+              <li>Apply synthetic augmentation carefully and validate plausibility.</li>
+              <li>Combine class weighting with ensemble approaches for robustness.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="reflection" style="margin-top:8px;">
+          <strong>Validation concern:</strong> Ensure synthetic data is plausible through domain expertise, statistical analysis, visualization, iterative testing, and by augmenting rather than replacing real data.
+        </div>
+      </div>
+    </section>
+
+    <!-- Takeaways -->
+    <section id="takeaways" data-aos="fade-up" data-aos-delay="500">
+      <h2>Key Takeaways</h2>
+      <div class="takeaways-wrapper">
+        <div class="takeaway">
+          <div><strong>Missing Data</strong></div>
+          <div title="Assess before impute/extrapolate">Understand why values are missing before choosing to ignore, interpolate, or extrapolate.</div>
+        </div>
+        <div class="takeaway">
+          <div><strong>Noisy Data</strong></div>
+          <div title="Use filters and models">Outlier removal depends on context; smoothing and ML-based detection refine inputs.</div>
+        </div>
+        <div class="takeaway">
+          <div><strong>Imbalanced Data</strong></div>
+          <div title="Beyond accuracy">Combine sampling, synthetic generation, weighting, and ensembles to reduce majority-class bias.</div>
+        </div>
+        <div class="takeaway">
+          <div><strong>Synthetic Data</strong></div>
+          <div title="Validate plausibility">Validate generated examples with domain expertise, statistics, visualization, and testing.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Applied Uses -->
+    <section id="applied" data-aos="fade-up" data-aos-delay="550">
+      <h2>Applied Uses</h2>
+      <div class="applied-grid">
+        <div class="applied-card">
+          <div class="topic-label">Missing Data Handling</div>
+          <div>Start ML preprocessing by assessing missingness and justify interpolation or extrapolation based on data structure.</div>
+        </div>
+        <div class="applied-card">
+          <div class="topic-label">Noise Management</div>
+          <div>Mix outlier evaluation, smoothing, and learned noise detection to prepare features that retain signal.</div>
+        </div>
+        <div class="applied-card">
+          <div class="topic-label">Class Imbalance</div>
+          <div>Use resampling, SMOTE, class weighting, and ensembles to ensure minority-class visibility.</div>
+        </div>
+        <div class="applied-card">
+          <div class="topic-label">Synthetic Validation</div>
+          <div>Ensure augmented data is plausible through expert review, statistical tests, visualization, and controlled testing.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reflection -->
+    <section id="reflection" data-aos="fade-up" data-aos-delay="650">
+      <div class="scenario">
+        <div class="title"><i class="fas fa-clipboard-check"></i> Final Reflection</div>
+        <p>This post captures the machine learning data decisions discussed: handling missing values with context-aware interpolation/extrapolation, treating noisy inputs with layered detection, and managing imbalance with rebalancing and validated augmentation. Everything here comes directly from the chat interaction and is framed for practical ML workflows.</p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="faint">Based solely on the chat content. Last updated: August 3, 2025.</div>
+    </footer>
+  </main>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({ once: true, duration: 600, easing: 'ease-out-cubic' });
+
+    // Collapsible panels
+    document.querySelectorAll('.collapsible').forEach(col => {
+      const header = col.querySelector('.collapsible-header');
+      const body = col.querySelector('.collapsible-body');
+      header.addEventListener('click', () => {
+        const expanded = header.getAttribute('aria-expanded') === 'true';
+        header.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        if (expanded) {
+          body.style.display = 'none';
+          header.querySelector('i').classList.replace('fa-chevron-up','fa-chevron-down');
+        } else {
+          body.style.display = 'block';
+          header.querySelector('i').classList.replace('fa-chevron-down','fa-chevron-up');
+        }
+      });
+    });
+
+    // Navigation sync & progress
+    const sections = document.querySelectorAll('section');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    function syncNav() {
+      const scrollY = window.scrollY + 140;
+      sections.forEach(sec => {
+        if (sec.offsetTop <= scrollY && (sec.offsetTop + sec.offsetHeight) > scrollY) {
+          const id = sec.id;
+          localStorage.setItem('lastSection', id);
+          sidebarLinks.forEach(l => l.classList.remove('active'));
+          const match = document.querySelector(`.sidebar a[href="#${id}"]`);
+          if (match) match.classList.add('active');
+        }
+      });
+      const percent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+      document.getElementById('progress-bar').style.width = percent + '%';
+    }
+    window.addEventListener('scroll', syncNav);
+    syncNav();
+
+    // Restore last section
+    const last = localStorage.getItem('lastSection');
+    if (last) {
+      const target = document.getElementById(last);
+      if (target) target.scrollIntoView({behavior:'auto',block:'start'});
+    }
+
+    // Theme toggle
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const icon = document.querySelector('.theme-icon');
+      if (document.body.classList.contains('dark-mode')) {
+        icon.textContent = '☀️';
+        localStorage.setItem('theme','dark');
+      } else {
+        icon.textContent = '🌙';
+        localStorage.setItem('theme','light');
+      }
+    }
+    (function(){
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.querySelector('.theme-icon').textContent = '☀️';
+      }
+    })();
+
+    // Smooth scrolling for sidebar
+    document.querySelectorAll('.sidebar a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) target.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+    });
+  </script>
+</body>
+</html>
