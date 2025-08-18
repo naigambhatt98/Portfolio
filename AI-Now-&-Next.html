@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Now & Next — August 16, 2025</title>
+  <meta name="color-scheme" content="light dark">
+  <style>
+    /* ----------------------
+       Design tokens
+    ---------------------- */
+    :root {
+      --bg: #0a0b0f;
+      --bg-gradient: linear-gradient(135deg, #0a0b0f 0%, #0f1114 50%, #0a0b0f 100%);
+      --surface: rgba(255,255,255,.08);
+      --surface-2: rgba(255,255,255,.12);
+      --surface-hover: rgba(255,255,255,.15);
+      --text: #f8fafc;
+      --text-bright: #ffffff;
+      --muted: #c7cbd4;
+      --muted2: #9aa3b2;
+      --accent-1: #6366f1; /* indigo */
+      --accent-2: #14b8a6; /* teal */
+      --accent-3: #8b5cf6; /* violet */
+      --accent-glow: rgba(99, 102, 241, 0.3);
+      --border: 1px solid rgba(255,255,255,.12);
+      --border-bright: 1px solid rgba(255,255,255,.2);
+      --shadow: 0 25px 80px rgba(0,0,0,.6);
+      --shadow-hover: 0 35px 100px rgba(0,0,0,.7);
+      --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+      --radius: 20px;
+      --radius-sm: 14px;
+      --headline-grad: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%);
+      --rule-grad: linear-gradient(90deg, var(--accent-1), var(--accent-2), var(--accent-3));
+      --card-grad: linear-gradient(135deg, var(--surface-2) 0%, var(--surface) 100%);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      color-scheme: dark light;
+    }
+
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 30%, #f1f5f9 70%, #e2e8f0 100%);
+      --surface: rgba(0,0,0,.02);
+      --surface-2: rgba(0,0,0,.04);
+      --surface-hover: rgba(0,0,0,.06);
+      --text: #1e293b;
+      --text-bright: #0f172a;
+      --muted: #475569;
+      --muted2: #64748b;
+      --accent-1: #4f46e5;
+      --accent-2: #059669;
+      --accent-3: #7c3aed;
+      --accent-glow: rgba(79, 70, 229, 0.2);
+      --border: 1px solid rgba(0,0,0,.12);
+      --border-bright: 1px solid rgba(0,0,0,.18);
+      --shadow: 0 20px 60px rgba(0,0,0,.12);
+      --shadow-hover: 0 30px 80px rgba(0,0,0,.18);
+      --shadow-glow: 0 0 30px rgba(79, 70, 229, 0.15);
+      --headline-grad: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      --rule-grad: linear-gradient(90deg, #4f46e5, #059669, #7c3aed);
+      --card-grad: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.8) 100%);
+      --glass-bg: rgba(255, 255, 255, 0.8);
+      --glass-border: rgba(0, 0, 0, 0.1);
+      color-scheme: light dark;
+    }
+
+    /* ----------------------
+       Base & layout
+    ---------------------- */
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      background-image: var(--bg-gradient);
+      background-attachment: fixed;
+      color: var(--text);
+      font: 16px/1.7 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    .container { max-width: 980px; margin: 0 auto; padding: 0 28px; }
+    .stack { display: grid; gap: 18px; }
+    a { color: inherit; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    a:hover { color: var(--accent-1); transform: translateY(-1px); }
+
+    /* Animated background elements */
+    .bg-art {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(ellipse 1400px 600px at 30% -20%, rgba(99,102,241,.25), transparent 70%),
+        radial-gradient(ellipse 1000px 700px at 80% 10%, rgba(20,184,166,.20), transparent 70%),
+        radial-gradient(ellipse 800px 500px at 60% 110%, rgba(139,92,246,.18), transparent 70%),
+        radial-gradient(ellipse 600px 400px at 10% 80%, rgba(99,102,241,.15), transparent 60%);
+      filter: saturate(120%) blur(0.5px);
+      animation: backgroundShift 20s ease-in-out infinite;
+    }
+    [data-theme="light"] .bg-art {
+      background:
+        radial-gradient(ellipse 1400px 600px at 30% -20%, rgba(79,70,229,.15), transparent 70%),
+        radial-gradient(ellipse 1000px 700px at 80% 10%, rgba(5,150,105,.12), transparent 70%),
+        radial-gradient(ellipse 800px 500px at 60% 110%, rgba(124,58,237,.10), transparent 70%),
+        radial-gradient(ellipse 600px 400px at 10% 80%, rgba(79,70,229,.08), transparent 60%);
+      filter: saturate(110%) blur(0.3px);
+    }
+    @keyframes backgroundShift {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(-20px, -10px) scale(1.02); }
+      50% { transform: translate(10px, -15px) scale(0.98); }
+      75% { transform: translate(-10px, 5px) scale(1.01); }
+    }
+
+    /* Floating particles */
+    .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+    .particle { position: absolute; width: 2px; height: 2px; background: var(--accent-1); border-radius: 50%; opacity: 0.3; animation: float 20s infinite linear; }
+    [data-theme="light"] .particle { background: var(--accent-1); opacity: 0.4; }
+    @keyframes float {
+      0% { transform: translateY(100vh) translateX(0px) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.3; }
+      90% { opacity: 0.3; }
+      100% { transform: translateY(-100px) translateX(100px) rotate(360deg); opacity: 0; }
+    }
+
+    /* Header */
+    .masthead { position: sticky; top: 0; backdrop-filter: blur(20px) saturate(180%); background: var(--glass-bg); border-bottom: var(--border); z-index: 100; transition: all 0.3s ease; }
+    .masthead.scrolled { backdrop-filter: blur(30px) saturate(200%); box-shadow: var(--shadow-glow); }
+    .caps { font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted2); opacity: 0.8; animation: fadeInUp 0.8s ease 0.2s both; }
+    h1.title {
+      font-size: clamp(40px, 7vw, 72px); line-height: 1.02; margin: 8px 0 0; font-weight: 900;
+      background: var(--headline-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+      letter-spacing: -0.02em; animation: fadeInUp 0.8s ease 0.4s both; text-shadow: 0 0 40px var(--accent-glow);
+    }
+    .byline { margin-top: 6px; color: var(--muted); font-size: 15px; font-weight: 500; }
+    .sub { margin: 10px 0 0; color: var(--muted); font-size: 18px; font-weight: 500; animation: fadeInUp 0.8s ease 0.6s both; }
+    .ed  { margin-top: 8px; font-size: 14px; color: var(--muted2); animation: fadeInUp 0.8s ease 0.8s both; }
+    .rule { height: 4px; background: var(--rule-grad); box-shadow: 0 0 30px rgba(99,102,241,.4); animation: expandWidth 1.2s ease 1s both; position: relative; overflow: hidden; }
+    .rule::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shimmer 3s ease-in-out infinite; }
+    @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+
+    /* Theme toggle */
+    .toggle {
+      position: absolute; right: 28px; top: 20px;
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--surface); border: var(--border-bright); border-radius: 999px;
+      padding: 10px 16px; cursor: pointer; font-size: 13px; color: var(--muted);
+      box-shadow: var(--shadow); backdrop-filter: blur(10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: fadeInUp 0.8s ease 1s both;
+    }
+    .toggle:hover { transform: translateY(-2px) scale(1.02); box-shadow: var(--shadow-hover); background: var(--surface-hover); border-color: var(--accent-1); }
+    .toggle b { color: var(--text-bright); font-weight: 600; }
+
+    /* Cards */
+    .card {
+      border-radius: var(--radius); padding: 32px; background: var(--card-grad); border: var(--border-bright);
+      box-shadow: var(--shadow); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; backdrop-filter: blur(10px);
+    }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); opacity: 0; transition: opacity 0.3s ease; }
+    .card:hover { transform: translateY(-4px) scale(1.01); box-shadow: var(--shadow-hover); border-color: rgba(99,102,241,0.3); }
+    .card:hover::before { opacity: 1; }
+    .soft { background: linear-gradient(135deg, var(--surface) 0%, rgba(255,255,255,.04) 100%); border: var(--border); padding: 24px; }
+    .soft:hover { background: linear-gradient(135deg, var(--surface-hover) 0%, rgba(255,255,255,.08) 100%); }
+
+    /* Headings */
+    h2.section {
+      font-size: clamp(28px, 4vw, 38px); line-height: 1.2; margin: 48px 0 20px; font-weight: 800; letter-spacing: -0.01em;
+    }
+    h2.section > span { background: var(--headline-grad); -webkit-background-clip: text; background-clip: text; color: transparent; position: relative; }
+    h2.section > span::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 60px; height: 3px; background: var(--rule-grad); border-radius: 2px; opacity: 0.7; }
+    h3 { font-size: 22px; margin: 0 0 12px; font-weight: 700; color: var(--text-bright); }
+
+    /* Enhanced lists */
+    ul { margin-top: 12px; padding-left: 0; list-style: none; }
+    ul li { position: relative; padding-left: 24px; margin-bottom: 8px; transition: all 0.3s ease; }
+    ul li::before { content: ''; position: absolute; left: 0; top: 12px; width: 6px; height: 6px; background: var(--accent-1); border-radius: 50%; box-shadow: 0 0 10px var(--accent-glow); }
+    ul li:hover { transform: translateX(4px); color: var(--text-bright); }
+
+    /* Pills */
+    .pill {
+      display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 999px; border: var(--border);
+      background: var(--card-grad); color: var(--muted); font-size: 13px; font-weight: 500; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .pill:hover { transform: translateY(-2px); border-color: var(--accent-1); color: var(--text-bright); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+    .kpis { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+
+    /* Enhanced Timeline */
+    .timeline { margin-top: 20px; padding: 16px; background: rgba(255,255,255,0.03); border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.08); }
+    .tl-wrap { height: 10px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+    .tl-bar  { height: 100%; width: var(--pct); background: var(--rule-grad); box-shadow: 0 0 20px rgba(99,102,241,.4); animation: progressFill 1.5s ease-out 0.5s both; position: relative; }
+    .tl-bar::after { content: ''; position: absolute; top: 0; right: 0; width: 20px; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3)); animation: progressShine 2s ease-in-out infinite; }
+    @keyframes progressFill { from { width: 0; } to { width: var(--pct); } }
+    @keyframes progressShine { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+    .tl-label { font-size: 12px; color: var(--muted2); margin-top: 10px; font-weight: 500; }
+
+    /* Footer */
+    .footer { border-top: var(--border-bright); margin-top: 60px; padding-top: 32px; color: var(--muted);
+      background: linear-gradient(135deg, rgba(255,255,255,0.02), transparent); border-radius: var(--radius) var(--radius) 0 0; }
+
+    /* Enhanced Animations */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes expandWidth { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .fadeUp { animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) both; }
+    .fadeUpDelay { animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both; }
+
+    /* Scroll animations */
+    .scroll-reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+    .scroll-reveal.revealed { opacity: 1; transform: translateY(0); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 0 20px; }
+      .toggle { right: 20px; }
+      .card { padding: 24px; }
+      h1.title { font-size: clamp(32px, 8vw, 48px); }
+    }
+
+    /* Print */
+    @media print {
+      :root { --bg:#fff; --text:#111; --muted:#445; --muted2:#667; --surface:#fff; --surface-2:#fff; --border: 1px solid #ddd; --headline-grad: linear-gradient(90deg,#111,#666); }
+      .bg-art, .toggle, .particles { display: none; }
+      .card { box-shadow: none; }
+      .masthead { position: static; }
+      .rule { height: 2px; box-shadow: none; }
+      * { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-art"></div>
+  <div class="particles" id="particles"></div>
+
+  <header class="masthead" id="masthead">
+    <div class="container" style="padding-top:60px; padding-bottom:36px; position:relative;">
+      <button class="toggle" id="themeToggle" title="Toggle light/dark mode" aria-pressed="false">
+        <b>Theme</b> · <span id="themeLabel">Dark</span>
+      </button>
+      <div class="caps">Newsletter</div>
+      <h1 class="title">AI Now & Next</h1>
+      <div class="byline">By Naigam Bhatt</div>
+      <p class="sub">Weekly brief on applied AI in business</p>
+      <div class="ed">Edition • August 16, 2025</div>
+    </div>
+    <div class="rule"></div>
+  </header>
+
+  <main class="container" style="padding-top:40px; padding-bottom:100px">
+    <section style="margin-bottom:32px" class="fadeUp scroll-reveal">
+      <div class="card soft">
+        This issue centers on <strong>retail personalization</strong>, <strong>grid flexibility</strong>, and <strong>factory vision QA</strong>—each a concrete launch or expansion from the past month and what it changes in day-to-day decisions.
+        <div class="kpis">
+          <span class="pill">Curated • Last 30 days</span>
+          <span class="pill">Impact first</span>
+          <span class="pill">Print-friendly</span>
+        </div>
+      </div>
+    </section>
+
+    <article class="fadeUpDelay scroll-reveal">
+      <h2 class="section"><span>Retail & E-commerce</span></h2>
+      <div class="card">
+        <p class="muted2" style="margin-top:0;margin-bottom:12px;font-size:14px;font-weight:600;">
+          <strong>What happened</strong> — Saks Global • AI-Personalized Homepages (Aug 14, 2025)
+        </p>
+        <ul>
+          <li><strong>+7%</strong> revenue per visitor during pilot</li>
+          <li><strong>~+10%</strong> conversion lift in early cohort</li>
+          <li>Rollout completed; expansion planned across portfolio brands</li>
+        </ul>
+        <div style="margin-top:18px">
+          <p style="margin:12px 0"><strong>Why it matters</strong> — Personalization is the storefront logic. Real-time ranking chooses layout and product order for each visitor, reducing reliance on broad campaigns.</p>
+          <p style="margin:12px 0"><strong>Metrics to watch</strong> — Revenue/visitor, Add-to-cart rate, Return rate vs. control.</p>
+          <p style="margin:12px 0;font-style:italic"><strong style="font-style:normal">Outlook</strong> — Cross-brand signals (Saks, Neiman, Bergdorf) can compound performance if governance and attribution stay tight.</p>
+        </div>
+        <div class="timeline">
+          <div class="tl-wrap"><div class="tl-bar" style="--pct:7%"></div></div>
+          <div class="tl-label">Days since announcement: 2</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="fadeUpDelay scroll-reveal">
+      <h2 class="section"><span>Energy & Utilities</span></h2>
+      <div class="card">
+        <p class="muted2" style="margin-top:0;margin-bottom:12px;font-size:14px;font-weight:600;">
+          <strong>What happened</strong> — Constellation + GridBeyond / GoodLeap + CT Green Bank • AI Demand Response in PJM & AI-powered VPP (Jul 31 & Aug 13, 2025)
+        </p>
+        <ul>
+          <li>Digital twins forecast peaks and automate sub-meter dispatch</li>
+          <li>Residential solar+storage aggregated for peak reduction</li>
+          <li>Participants paid while improving local reliability</li>
+        </ul>
+        <div style="margin-top:18px">
+          <p style="margin:12px 0"><strong>Why it matters</strong> — AI turns flexible demand and home storage into dispatchable capacity. Facilities can price curtailment like a financial option rather than a manual scramble.</p>
+          <p style="margin:12px 0"><strong>Metrics to watch</strong> — $/MWh earned in DR, Avoided demand charges, Event participation rate.</p>
+          <p style="margin:12px 0;font-style:italic"><strong style="font-style:normal">Outlook</strong> — Expect deeper ties with data-center curtailment deals and time-of-use incentives as enrollment scales.</p>
+        </div>
+        <div class="timeline">
+          <div class="tl-wrap"><div class="tl-bar" style="--pct:53%"></div></div>
+          <div class="tl-label">Days since announcement: 16</div>
+        </div>
+      </div>
+    </article>
+
+    <article class="fadeUpDelay scroll-reveal">
+      <h2 class="section"><span>Manufacturing & Automotive</span></h2>
+      <div class="card">
+        <p class="muted2" style="margin-top:0;margin-bottom:12px;font-size:14px;font-weight:600;">
+          <strong>What happened</strong> — Ford • AiTriz (video ML) & MAIVS (image QA) (Aug 11, 2025)
+        </p>
+        <ul>
+          <li>~35 stations (AiTriz) and ~700 stations (MAIVS) in NA plants</li>
+          <li>Millimeter-level misalignment checks with in-station decisions</li>
+          <li>Defect libraries speed root-cause and recurrence prevention</li>
+        </ul>
+        <div style="margin-top:18px">
+          <p style="margin:12px 0"><strong>Why it matters</strong> — Real-time vision QA catches issues upstream, cutting rework and warranty risk while improving first-time-through.</p>
+          <p style="margin:12px 0"><strong>Metrics to watch</strong> — First-time-through, Defects per unit, Rework hours, Warranty claim rate.</p>
+          <p style="margin:12px 0;font-style:italic"><strong style="font-style:normal">Outlook</strong> — Next up: torque, sealant, connector checks for a unified AI QA fabric.</p>
+        </div>
+        <div class="timeline">
+          <div class="tl-wrap"><div class="tl-bar" style="--pct:17%"></div></div>
+          <div class="tl-label">Days since announcement: 5</div>
+        </div>
+      </div>
+    </article>
+
+    <section style="margin-top:56px" class="fadeUpDelay scroll-reveal">
+      <h2 class="section"><span>On the radar</span></h2>
+      <div class="stack">
+        <div class="card soft">
+          <p style="margin:0 0 6px;font-weight:700;color:var(--text-bright)">Microsoft Copilot adds GPT-5</p>
+          <p class="muted" style="margin:0">Agentic workflows across web, Windows, Mac, mobile—watch multi-step automations.</p>
+        </div>
+        <div class="card soft">
+          <p style="margin:0 0 6px;font-weight:700;color:var(--text-bright)">NVIDIA Omniverse & Cosmos for robotics</p>
+          <p class="muted" style="margin:0">Simulation + physical AI to compress validation cycles for industrial robots.</p>
+        </div>
+        <div class="card soft">
+          <p style="margin:0 0 6px;font-weight:700;color:var(--text-bright)">Energy constraints steer AI build-outs</p>
+          <p class="muted" style="margin:0">Curtailment agreements and cleaner-power partnerships shape data-center siting.</p>
+        </div>
+        <div class="card soft">
+          <p style="margin:0 0 6px;font-weight:700;color:var(--text-bright)">Retail AI assistants head into holiday</p>
+          <p class="muted" style="margin:0">Conversational shopping raises trust and attribution questions.</p>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-top:56px" class="fadeUpDelay scroll-reveal">
+      <h3 style="margin:0 0 16px;font-size:24px;font-weight:700;color:var(--text-bright)">Sources & further reading</h3>
+      <div class="card soft">
+        <ul style="margin:0;padding-left:0;color:var(--muted);font-size:14px">
+          <li>Vogue Business — Saks personalization (Aug 14, 2025)</li>
+          <li>Constellation + GridBeyond — PJM AI Demand Response (Jul 31, 2025)</li>
+          <li>PR Newswire — GoodLeap + CT Green Bank VPP (Aug 13, 2025)</li>
+          <li>Business Insider — Ford AiTriz/MAIVS rollout (Aug 11, 2025)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="footer scroll-reveal">
+      <div class="card soft" style="margin-bottom: 24px;">
+        <p style="margin:0 0 12px;font-weight:600;color:var(--text-bright)">Stay Connected</p>
+        <p class="muted" style="margin:0 0 16px;">You're reading <em>AI Now & Next</em>. Forward this brief to a colleague who cares about measurable impact.</p>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+          <a href="#" class="pill" style="text-decoration:none;">Subscribe</a>
+          <a href="#" class="pill" style="text-decoration:none;">Archive</a>
+          <a href="#" class="pill" style="text-decoration:none;">Feedback</a>
+        </div>
+        <p class="muted2" style="margin:0;font-size:13px;opacity:0.7;">Weekly insights • Business impact • No fluff</p>
+      </div>
+      <div style="text-align:center;padding:20px 0;border-top:var(--border);background:rgba(255,255,255,0.02);border-radius:var(--radius-sm);">
+        <p class="muted2" style="margin:0;font-size:13px">© 2025 AI Now & Next • All rights reserved.</p>
+        <p class="muted2" style="margin:4px 0 0;font-size:11px;opacity:0.6;">Curated with precision • Delivered with purpose</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // -------- Theme toggle (with persistence + color-scheme sync) --------
+    const html = document.documentElement;
+    const btn  = document.getElementById('themeToggle');
+    const label= document.getElementById('themeLabel');
+
+    function applyTheme(theme) {
+      html.setAttribute('data-theme', theme);
+      // Sync color-scheme for native form controls, etc.
+      html.style.colorScheme = (theme === 'light') ? 'light' : 'dark';
+      label.textContent = (theme === 'light') ? 'Light' : 'Dark';
+      btn.setAttribute('aria-pressed', theme === 'light');
+      try { localStorage.setItem('ai_now_next_theme', theme); } catch(e) {}
+    }
+
+    // Initialize theme: saved -> system -> default (dark)
+    (function initTheme(){
+      let theme = null;
+      try { theme = localStorage.getItem('ai_now_next_theme'); } catch(e) {}
+      if (!theme) {
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        theme = prefersLight ? 'light' : (html.getAttribute('data-theme') || 'dark');
+      }
+      applyTheme(theme);
+      // React to system changes if user hasn't chosen explicitly
+      try {
+        if (!localStorage.getItem('ai_now_next_theme') && window.matchMedia) {
+          window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+            applyTheme(e.matches ? 'light' : 'dark');
+          });
+        }
+      } catch(e) {}
+    })();
+
+    btn.addEventListener('click', () => {
+      const newTheme = (html.getAttribute('data-theme') === 'light') ? 'dark' : 'light';
+      // Smooth transition
+      html.style.transition = 'background-color .3s ease, color .3s ease, filter .3s ease';
+      applyTheme(newTheme);
+      setTimeout(() => { html.style.transition = ''; }, 350);
+    });
+
+    // -------- Particles --------
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 15;
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + 'vw';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+    createParticles();
+
+    // -------- Scroll-based header effects --------
+    const masthead = document.getElementById('masthead');
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      if (scrollTop > 100) masthead.classList.add('scrolled');
+      else masthead.classList.remove('scrolled');
+    });
+
+    // -------- Intersection Observer for scroll animations --------
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('revealed');
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+    // -------- Timeline animation refresh on view --------
+    const timelineObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const bar = entry.target.querySelector('.tl-bar');
+          if (bar) {
+            bar.style.animation = 'none';
+            bar.offsetHeight; // reflow
+            bar.style.animation = 'progressFill 1.5s ease-out both';
+          }
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.timeline').forEach(tl => timelineObserver.observe(tl));
+
+    // -------- Smooth scroll for anchor links --------
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // -------- Reduced motion support --------
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mediaQuery.matches) {
+      document.body.classList.add('reduce-motion');
+    }
+    mediaQuery.addEventListener?.('change', (e) => {
+      document.body.classList.toggle('reduce-motion', e.matches);
+    });
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .reduce-motion * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>
