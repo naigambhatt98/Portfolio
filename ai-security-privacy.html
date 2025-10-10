@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Blog: Secure & Private AI for Robotics – Naigam Bhatt</title>
+  <meta name="description" content="A stylized blog-style project page for the Secure & Private AI presentation demonstrating AI security and privacy governance skills." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1020; --bg2:#0b122e; --glass:#0f173a; --card:#0e1633; --muted:#98a2b3; --text:#e6eaf3; --accent:#7c9cff; --accent2:#60e7d7; --ring:rgba(124,156,255,.45);
+      --grad: radial-gradient(1200px 800px at 90% -10%, rgba(124,156,255,.15), transparent 55%), radial-gradient(800px 600px at 10% 10%, rgba(96,231,215,.18), transparent 55%), linear-gradient(180deg, var(--bg), var(--bg2));
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--grad);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.6}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:1100px;margin:0 auto;padding:28px}
+
+    /* Hero */
+    .hero{position:relative;padding:28px;border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);overflow:hidden}
+    .hero:before,.hero:after{content:"";position:absolute;inset:auto;filter:blur(40px);opacity:.35;pointer-events:none}
+    .hero:before{width:280px;height:280px;right:-60px;top:-60px;background:radial-gradient(closest-side, var(--accent), transparent)}
+    .hero:after{width:260px;height:260px;left:-60px;bottom:-60px;background:radial-gradient(closest-side, var(--accent2), transparent)}
+    .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+    h1{font-size:36px;line-height:1.2;margin:.2rem 0 6px}
+    .lead{color:#cbd5e1;max-width:70ch;margin:6px 0 14px}
+    .cta-row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:14px;background:linear-gradient(180deg, var(--accent), #547bff);color:#08102a;font-weight:800;box-shadow:0 12px 34px var(--ring);transition:transform .12s ease, box-shadow .12s ease}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 16px 38px var(--ring)}
+    .btn.secondary{background:#172352;color:#dbe4ff;box-shadow:0 0 0 1px rgba(124,156,255,.25) inset}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.16);color:#dbe4ff}
+
+    /* Layout */
+    .grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
+    @media (min-width: 980px){.grid{grid-template-columns:1.1fr .9fr}}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:18px}
+    .card h2{margin:.2rem 0 8px;font-size:20px}
+    .divider{height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);margin:8px 0 14px}
+
+    /* Fancy lists */
+    ul{padding-left:18px;margin:8px 0}
+    li{margin:6px 0}
+    .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .badge{font-size:12px;color:#cbd5e1;background:#0f1734;border:1px solid rgba(255,255,255,.1);padding:6px 10px;border-radius:999px}
+
+    /* Process timeline */
+    .timeline{position:relative;margin:8px 0}
+    .timeline::before{content:"";position:absolute;left:16px;top:0;bottom:0;width:2px;background:linear-gradient(180deg, rgba(124,156,255,.5), rgba(96,231,215,.5))}
+    .step{position:relative;padding-left:48px;margin:14px 0}
+    .dot{position:absolute;left:8px;top:2px;width:18px;height:18px;border-radius:50%;background:linear-gradient(180deg, var(--accent), var(--accent2));box-shadow:0 0 0 4px rgba(124,156,255,.2)}
+    .step h3{margin:0;font-size:16px}
+    .step p{margin:4px 0 0;color:#c7d2fe}
+
+    /* Two-up section */
+    .split{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
+    @media (min-width: 760px){.split{grid-template-columns:1fr 1fr}}
+
+    /* Value tiles */
+    .kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (min-width: 680px){.kpis{grid-template-columns:repeat(4,1fr)}}
+    .kpi{background:#0e1530;border:1px solid rgba(255,255,255,.08);padding:14px;border-radius:14px;text-align:center}
+    .kpi b{display:block;font-size:18px}
+    .muted{color:var(--muted)}
+
+    /* Details/summary */
+    details{background:#0f1633;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 12px}
+    summary{cursor:pointer;font-weight:700;color:#d5ddff}
+
+    /* Footer */
+    footer{margin-top:28px;padding:12px 0 20px;color:#94a3b8;font-size:13px;text-align:center}
+
+    @media (prefers-reduced-motion: reduce){.btn,.hero:before,.hero:after{transition:none}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <div class="eyebrow">Project Blog</div>
+      <h1>Secure & Private AI for Robotics</h1>
+      <p class="lead">An applied project that transforms AI security, privacy, and compliance into an executive‑ready roadmap — inspired by responsibilities of an <strong>Artificial Intelligence Consultant</strong>.</p>
+      <div class="cta-row">
+        <a class="btn" href="presentation-secure-private-ai.pptx" download target="_blank" rel="noopener">⬇️ View / Download Presentation</a>
+        <a class="btn secondary" href="#process">Explore My Process</a>
+        <button class="btn ghost" id="copyLink" aria-label="Copy blog link">🔗 Copy Link</button>
+      </div>
+    </section>
+
+    <section class="grid" style="margin-top:18px">
+      <article class="card">
+        <h2>About This Project</h2>
+        <div class="divider"></div>
+        <p>This project explores <strong>AI security and privacy frameworks</strong> for robotics systems. It presents a <strong>PowerPoint presentation</strong> that outlines a robotics data lifecycle, GDPR‑aligned safeguards, measurable security metrics, and a <strong>30/60/90‑day roadmap</strong> for AI governance. The result demonstrates my ability to translate complex AI risks into actionable strategies for executive and legal teams.</p>
+        <div class="badges">
+          <span class="badge">AI Governance</span>
+          <span class="badge">Data Privacy</span>
+          <span class="badge">Risk Management</span>
+          <span class="badge">Executive Communication</span>
+        </div>
+      </article>
+      <aside class="card">
+        <h2>Tools & Frameworks</h2>
+        <div class="divider"></div>
+        <div class="badges">
+          <span class="badge">Microsoft PowerPoint</span>
+          <span class="badge">ChatGPT (prompt iterations)</span>
+          <span class="badge">Canva (visual inspiration)</span>
+          <span class="badge">GDPR • NIST RMF • IEEE</span>
+        </div>
+        <p class="muted" style="margin-top:8px">Guardrails: validated content with real governance models and ethical AI standards.</p>
+      </aside>
+    </section>
+
+    <section id="process" class="card split">
+      <div>
+        <h2>Objective</h2>
+        <div class="divider"></div>
+        <p>To design a visually engaging and technically sound roadmap for secure, ethical AI deployment in robotics — balancing innovation with regulation and stakeholder trust.</p>
+        <div class="kpis" style="margin-top:10px">
+          <div class="kpi"><b>30</b><span class="muted">day prompt hardening</span></div>
+          <div class="kpi"><b>60</b><span class="muted">day DPIAs completed</span></div>
+          <div class="kpi"><b>90</b><span class="muted">governance board established</span></div>
+          <div class="kpi"><b>NIST</b><span class="muted">framework integrated</span></div>
+        </div>
+      </div>
+      <div>
+        <h2>Process</h2>
+        <div class="divider"></div>
+        <div class="timeline">
+          <div class="step"><span class="dot"></span>
+            <h3>1) Define the challenge</h3>
+            <p>Mapped data flow vulnerabilities in robotics and aligned goals with legal, technical, and executive needs.</p>
+          </div>
+          <div class="step"><span class="dot"></span>
+            <h3>2) Ideate with GenAI</h3>
+            <p>Used ChatGPT for structured drafts, refining tone, and aligning compliance concepts with industry vocabulary.</p>
+          </div>
+          <div class="step"><span class="dot"></span>
+            <h3>3) Validate & align</h3>
+            <p>Integrated GDPR articles, NIST AI RMF guidance, and IEEE ethics standards to ensure alignment and reliability.</p>
+          </div>
+          <div class="step"><span class="dot"></span>
+            <h3>4) Deliver the story</h3>
+            <p>Designed slide layouts emphasizing clarity, measurable goals, and immediate applicability for decision‑makers.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="split">
+      <article class="card">
+        <h2>Project Insights</h2>
+        <div class="divider"></div>
+        <p>This project showcases how I merge <strong>technical AI expertise</strong> with <strong>strategic governance thinking</strong>. It’s designed not just as coursework but as a <strong>consulting case study</strong>— illustrating how organizations can operationalize responsible AI within real‑world robotics pipelines.</p>
+      </article>
+      <article class="card">
+        <h2>References</h2>
+        <div class="divider"></div>
+        <details open>
+          <summary>Frameworks cited</summary>
+          <ul>
+            <li>EU General Data Protection Regulation (GDPR)</li>
+            <li>NIST AI Risk Management Framework (2023)</li>
+            <li>IEEE Ethically Aligned Design for Autonomous Systems</li>
+          </ul>
+        </details>
+      </article>
+    </section>
+
+    <footer>
+      © <span id="year"></span> Naigam Bhatt — AI Project Blog
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const copyBtn = document.getElementById('copyLink');
+    if(copyBtn){
+      copyBtn.addEventListener('click', ()=>{
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(()=>{
+          copyBtn.textContent = '✅ Link Copied';
+          setTimeout(()=> copyBtn.textContent = '🔗 Copy Link', 1400);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
