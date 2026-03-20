@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bug Report Severity Classification - Decision Tree AI Solution</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Literata:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: #2a2a32;
+    --border2: #3a3a46;
+    --text: #eeeef0;
+    --muted: #888896;
+    --hint: #55555f;
+
+    --critical: #ff4444;
+    --critical-bg: #1a0a0a;
+    --critical-border: #3d1515;
+    --critical-glow: rgba(255,68,68,0.12);
+
+    --high: #ff9900;
+    --high-bg: #1a1000;
+    --high-border: #3d2800;
+    --high-glow: rgba(255,153,0,0.12);
+
+    --medium: #3b9eff;
+    --medium-bg: #060f1a;
+    --medium-border: #0d2540;
+    --medium-glow: rgba(59,158,255,0.12);
+
+    --low: #22c97a;
+    --low-bg: #061510;
+    --low-border: #0d3020;
+    --low-glow: rgba(34,201,122,0.12);
+
+    --accent: #7c6aff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Literata', Georgia, serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    padding: 60px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+  }
+
+  .header-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 18px;
+  }
+
+  h1 .accent { color: var(--accent); }
+
+  .header-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 620px;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--hint);
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 18px;
+    color: var(--text);
+  }
+
+  section { margin-bottom: 64px; }
+
+  .section-copy {
+    max-width: 760px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 22px;
+  }
+
+  .classifier-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 36px;
+    margin-bottom: 12px;
+  }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .progress-track {
+    height: 2px;
+    background: var(--border2);
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.4s ease;
+  }
+
+  .question-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.28rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  .opt-btn {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text);
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Literata', serif;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .opt-btn:hover { border-color: var(--accent); background: rgba(124,106,255,0.06); }
+  .opt-btn.selected { border-color: var(--accent); background: rgba(124,106,255,0.12); color: #c8c2ff; }
+
+  .nav-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .nav-btn {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    padding: 10px 22px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .nav-btn:hover { border-color: var(--accent); color: var(--text); }
+  .nav-btn.primary { border-color: var(--accent); color: var(--accent); }
+  .nav-btn.primary:hover { background: rgba(124,106,255,0.12); }
+
+  .result-wrap { display: none; }
+
+  .severity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 600px) { .severity-grid { grid-template-columns: 1fr; } }
+
+  .sev-card {
+    border: 1px solid;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sev-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .sev-card.critical { border-color: var(--critical-border); background: var(--critical-bg); }
+  .sev-card.critical::before { box-shadow: inset 0 0 40px var(--critical-glow); }
+  .sev-card.high     { border-color: var(--high-border); background: var(--high-bg); }
+  .sev-card.high::before { box-shadow: inset 0 0 40px var(--high-glow); }
+  .sev-card.medium   { border-color: var(--medium-border); background: var(--medium-bg); }
+  .sev-card.medium::before { box-shadow: inset 0 0 40px var(--medium-glow); }
+  .sev-card.low      { border-color: var(--low-border); background: var(--low-bg); }
+  .sev-card.low::before { box-shadow: inset 0 0 40px var(--low-glow); }
+
+  .sev-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+
+  .sev-card.critical .sev-name { color: var(--critical); }
+  .sev-card.high .sev-name     { color: var(--high); }
+  .sev-card.medium .sev-name   { color: var(--medium); }
+  .sev-card.low .sev-name      { color: var(--low); }
+
+  .sev-sla {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    opacity: 0.55;
+  }
+
+  .sev-triggers {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  .sev-owner {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 4px;
+  }
+
+  .tree-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 36px 28px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+  }
+
+  .tree-svg { width: 100%; min-width: 560px; display: block; }
+
+  .models-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 600px) { .models-grid { grid-template-columns: 1fr; } }
+
+  .model-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 22px 24px;
+    position: relative;
+  }
+
+  .model-card.best {
+    border-color: var(--accent);
+    background: rgba(124,106,255,0.06);
+  }
+
+  .best-badge {
+    position: absolute;
+    top: -1px;
+    right: 16px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+  }
+
+  .model-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--text);
+  }
+
+  .model-type {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .model-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    font-style: italic;
+  }
+
+  .model-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 3px 9px;
+    border: 1px solid var(--border2);
+    color: var(--hint);
+  }
+
+  .model-card.best .tag {
+    border-color: rgba(124,106,255,0.3);
+    color: #a89fff;
+  }
+
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .compare-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--hint);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .compare-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table .criterion { color: var(--text); font-weight: 400; font-style: italic; }
+
+  .dot-good { color: var(--low); font-weight: 500; }
+  .dot-mid  { color: var(--high); font-weight: 500; }
+  .dot-low  { color: var(--muted); }
+
+  .best-model-callout {
+    border: 1px solid var(--accent);
+    background: rgba(124,106,255,0.07);
+    padding: 28px 32px;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+  }
+
+  .callout-icon {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--accent);
+    flex-shrink: 0;
+    line-height: 1;
+    padding-top: 4px;
+  }
+
+  .callout-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .callout-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .callout-body {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-style: italic;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--hint);
+    letter-spacing: 0.1em;
+  }
+
+  .dt-node-root { fill: #1e1e2e; stroke: #7c6aff; stroke-width: 1; }
+  .dt-node-q    { fill: #1a1a26; stroke: #3a3a55; stroke-width: 0.75; }
+  .dt-node-crit { fill: #1a0a0a; stroke: #ff4444; stroke-width: 1; }
+  .dt-node-high { fill: #1a1000; stroke: #ff9900; stroke-width: 1; }
+  .dt-node-med  { fill: #060f1a; stroke: #3b9eff; stroke-width: 1; }
+  .dt-node-low  { fill: #061510; stroke: #22c97a; stroke-width: 1; }
+
+  .dt-text-root { fill: #c8c2ff; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+  .dt-text-sub  { fill: #7a7a96; font-family: 'DM Mono', monospace; font-size: 10px; }
+  .dt-text-q    { fill: #ccccdd; font-family: 'Literata', serif; font-size: 12px; }
+  .dt-text-crit { fill: #ff4444; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; }
+  .dt-text-high { fill: #ff9900; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; }
+  .dt-text-med  { fill: #3b9eff; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; }
+  .dt-text-low  { fill: #22c97a; font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; }
+  .dt-edge      { stroke: #2a2a3e; stroke-width: 1; fill: none; }
+  .dt-edge-yes  { stroke: #ff4444; stroke-width: 0.75; fill: none; }
+  .dt-edge-no   { stroke: #3b9eff; stroke-width: 0.75; fill: none; }
+  .dt-label-yes { fill: #ff4444; font-family: 'DM Mono', monospace; font-size: 10px; }
+  .dt-label-no  { fill: #3b9eff; font-family: 'DM Mono', monospace; font-size: 10px; }
+
+  @media (max-width: 760px) {
+    .best-model-callout {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    footer {
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="header-tag">Workshop Project · Decision Tree-Based AI</div>
+    <h1>Bug Report<br><span class="accent">Severity</span> Classification</h1>
+    <p class="header-sub">A compact visual for bug severity classification with the interaction and tree diagram as the main focus.</p>
+  </header>
+
+  <section>
+    <div class="section-label">Section 02</div>
+    <h2>Interactive Classification</h2>
+    <p class="section-copy">
+      Use the short interaction below to classify a bug by impact, scope, workaround, and frequency.
+    </p>
+
+    <div class="classifier-wrap">
+      <div class="progress-row">
+        <span id="step-label">Step 1 of 5</span>
+        <span id="step-name">System impact</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog" style="width:20%"></div>
+      </div>
+      <div id="quiz-area"></div>
+      <div class="result-wrap" id="result-area"></div>
+      <div class="nav-row">
+        <button class="nav-btn" id="back-btn" onclick="goBack()" style="display:none">← Back</button>
+        <button class="nav-btn primary" id="restart-btn" onclick="restart()" style="display:none">↺ Restart</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Section 03</div>
+    <h2>Severity Reference</h2>
+    <p class="section-copy">A quick reference for the four severity levels.</p>
+
+    <div class="severity-grid">
+      <div class="sev-card critical">
+        <div class="sev-name">Critical</div>
+        <div class="sev-sla">Immediate attention</div>
+        <div class="sev-triggers">Crash, outage, major data loss, or serious security issue.</div>
+        <div class="sev-owner">Handle first.</div>
+      </div>
+      <div class="sev-card high">
+        <div class="sev-name">High</div>
+        <div class="sev-sla">Urgent priority</div>
+        <div class="sev-triggers">Key functionality is broken or many users are affected.</div>
+        <div class="sev-owner">Prioritize early.</div>
+      </div>
+      <div class="sev-card medium">
+        <div class="sev-name">Medium</div>
+        <div class="sev-sla">Planned priority</div>
+        <div class="sev-triggers">Noticeable impact, but the system is still usable.</div>
+        <div class="sev-owner">Plan in backlog.</div>
+      </div>
+      <div class="sev-card low">
+        <div class="sev-name">Low</div>
+        <div class="sev-sla">When capacity allows</div>
+        <div class="sev-triggers">Minor visual issues or low-impact edge cases.</div>
+        <div class="sev-owner">Defer if needed.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Section 04</div>
+    <h2>Decision Tree Diagram</h2>
+    <p class="section-copy">A simplified question path for assigning severity.</p>
+
+    <div class="tree-wrap">
+      <svg class="tree-svg" viewBox="0 0 860 560" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="#2a2a3e" stroke-width="1.8" stroke-linecap="round"/>
+          </marker>
+          <marker id="arr-y" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="#ff4444" stroke-width="1.8" stroke-linecap="round"/>
+          </marker>
+          <marker id="arr-n" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M2 1L8 5L2 9" fill="none" stroke="#3b9eff" stroke-width="1.8" stroke-linecap="round"/>
+          </marker>
+        </defs>
+
+        <rect x="300" y="20" width="260" height="54" rx="4" class="dt-node-root"/>
+        <text x="430" y="44" text-anchor="middle" class="dt-text-root">Bug reported</text>
+        <text x="430" y="62" text-anchor="middle" class="dt-text-sub">Start severity classification</text>
+
+        <line x1="430" y1="74" x2="430" y2="110" class="dt-edge" marker-end="url(#arr)"/>
+
+        <rect x="270" y="110" width="320" height="54" rx="4" class="dt-node-q"/>
+        <text x="430" y="134" text-anchor="middle" class="dt-text-q">Does it crash the system?</text>
+        <text x="430" y="152" text-anchor="middle" class="dt-text-sub">Total outage or complete feature loss</text>
+
+        <path d="M270 137 L130 137 L130 240" class="dt-edge-yes" marker-end="url(#arr-y)"/>
+        <text x="192" y="128" text-anchor="middle" class="dt-label-yes">Yes</text>
+
+        <path d="M590 137 L720 137 L720 240" class="dt-edge-no" marker-end="url(#arr-n)"/>
+        <text x="648" y="128" text-anchor="middle" class="dt-label-no">No</text>
+
+        <rect x="60" y="240" width="140" height="54" rx="4" class="dt-node-crit"/>
+        <text x="130" y="263" text-anchor="middle" class="dt-text-crit">Critical</text>
+        <text x="130" y="281" text-anchor="middle" class="dt-text-sub" style="fill:#993333">System crash</text>
+
+        <rect x="580" y="240" width="280" height="54" rx="4" class="dt-node-q"/>
+        <text x="720" y="263" text-anchor="middle" class="dt-text-q">Data loss or security risk?</text>
+        <text x="720" y="281" text-anchor="middle" class="dt-text-sub">Breach, corruption, privacy leak</text>
+
+        <line x1="720" y1="294" x2="720" y2="360" class="dt-edge-yes" marker-end="url(#arr-y)"/>
+        <text x="728" y="332" class="dt-label-yes">Yes</text>
+
+        <path d="M580 267 L430 267 L430 340" class="dt-edge-no" marker-end="url(#arr-n)"/>
+        <text x="498" y="258" text-anchor="middle" class="dt-label-no">No</text>
+
+        <rect x="650" y="360" width="140" height="54" rx="4" class="dt-node-crit"/>
+        <text x="720" y="383" text-anchor="middle" class="dt-text-crit">Critical</text>
+        <text x="720" y="401" text-anchor="middle" class="dt-text-sub" style="fill:#993333">Data / security</text>
+
+        <rect x="285" y="340" width="290" height="54" rx="4" class="dt-node-q"/>
+        <text x="430" y="363" text-anchor="middle" class="dt-text-q">How many users are affected?</text>
+        <text x="430" y="381" text-anchor="middle" class="dt-text-sub">All · Some · Few</text>
+
+        <path d="M285 367 L160 367 L160 440" class="dt-edge" marker-end="url(#arr)"/>
+        <text x="204" y="358" text-anchor="middle" class="dt-text-sub" style="fill:#888896">All</text>
+
+        <line x1="430" y1="394" x2="430" y2="440" class="dt-edge" marker-end="url(#arr)"/>
+        <text x="438" y="424" class="dt-text-sub" style="fill:#888896">Some</text>
+
+        <path d="M575 367 L700 367 L700 440" class="dt-edge" marker-end="url(#arr)"/>
+        <text x="644" y="358" text-anchor="middle" class="dt-text-sub" style="fill:#888896">Few</text>
+
+        <rect x="70" y="440" width="180" height="54" rx="4" class="dt-node-q"/>
+        <text x="160" y="463" text-anchor="middle" class="dt-text-q">Workaround?</text>
+        <text x="160" y="481" text-anchor="middle" class="dt-text-sub">Can users still proceed?</text>
+
+        <path d="M70 467 L20 467 L20 520 L60 520" class="dt-edge-yes" marker-end="url(#arr-y)"/>
+        <text x="34" y="497" class="dt-label-yes">No</text>
+        <rect x="60" y="506" width="100" height="40" rx="4" class="dt-node-crit"/>
+        <text x="110" y="530" text-anchor="middle" class="dt-text-crit">Critical</text>
+
+        <path d="M250 467 L310 467 L310 520 L330 520" class="dt-edge-no" marker-end="url(#arr-n)"/>
+        <text x="278" y="458" class="dt-label-no">Yes</text>
+        <rect x="330" y="506" width="100" height="40" rx="4" class="dt-node-high"/>
+        <text x="380" y="530" text-anchor="middle" class="dt-text-high">High</text>
+
+        <rect x="340" y="440" width="180" height="54" rx="4" class="dt-node-q"/>
+        <text x="430" y="463" text-anchor="middle" class="dt-text-q">Workaround?</text>
+        <text x="430" y="481" text-anchor="middle" class="dt-text-sub">Also consider frequency</text>
+
+        <path d="M380 494 L380 506" class="dt-edge-yes" marker-end="url(#arr-y)"/>
+        <text x="388" y="503" class="dt-label-yes">No</text>
+
+        <path d="M480 467 L510 467 L510 506" class="dt-edge-no" marker-end="url(#arr-n)"/>
+        <text x="488" y="458" class="dt-label-no">Yes</text>
+        <rect x="460" y="506" width="100" height="40" rx="4" class="dt-node-med"/>
+        <text x="510" y="530" text-anchor="middle" class="dt-text-med">Medium</text>
+
+        <rect x="620" y="440" width="160" height="54" rx="4" class="dt-node-q"/>
+        <text x="700" y="463" text-anchor="middle" class="dt-text-q">Frequency?</text>
+        <text x="700" y="481" text-anchor="middle" class="dt-text-sub">Always → Medium / Rare → Low</text>
+
+        <path d="M660 494 L630 510" class="dt-edge" marker-end="url(#arr)"/>
+        <rect x="590" y="506" width="80" height="40" rx="4" class="dt-node-med"/>
+        <text x="630" y="530" text-anchor="middle" class="dt-text-med">Medium</text>
+
+        <path d="M740 494 L760 510" class="dt-edge" marker-end="url(#arr)"/>
+        <rect x="740" y="506" width="80" height="40" rx="4" class="dt-node-low"/>
+        <text x="780" y="530" text-anchor="middle" class="dt-text-low">Low</text>
+
+        <rect x="340" y="506" width="80" height="40" rx="4" class="dt-node-high"/>
+        <text x="380" y="530" text-anchor="middle" class="dt-text-high">High</text>
+      </svg>
+    </div>
+
+    <p style="font-size:13px;color:var(--muted);font-style:italic;margin-top:8px">
+      Red paths show answers that increase severity. Blue paths show answers that move toward lower severity levels.
+    </p>
+  </section>
+
+  <section>
+    <div class="section-label">Section 05</div>
+    <h2>Model Note</h2>
+    <p class="section-copy">
+      Tree-based models such as XGBoost, LightGBM, CatBoost, and Random Forest are a strong fit because they follow structured, question-based logic similar to the classifier and diagram shown above.
+    </p>
+  </section>
+
+  <footer>
+    <span>Bug Severity Classification · Decision Tree-Based AI Workshop</span>
+    <span>March 2026</span>
+  </footer>
+
+</div>
+
+<script>
+const questions = [
+  {
+    id: 'impact',
+    label: 'System impact',
+    q: 'Does the bug crash the system or make a core feature completely unavailable?',
+    opts: [
+      { t: 'Yes, it causes a crash or complete loss of a key feature', v: 'yes' },
+      { t: 'No, the system still runs', v: 'no' }
+    ]
+  },
+  {
+    id: 'data',
+    label: 'Data and security',
+    q: 'Does it create data loss, corruption, or a security or privacy risk?',
+    opts: [
+      { t: 'Yes, data or security is at risk', v: 'yes' },
+      { t: 'No, data and security are not affected', v: 'no' }
+    ]
+  },
+  {
+    id: 'users',
+    label: 'User scope',
+    q: 'How many users are affected by this bug?',
+    opts: [
+      { t: 'All or most users', v: 'all' },
+      { t: 'A noticeable group of users', v: 'some' },
+      { t: 'Only a small group or edge case', v: 'few' }
+    ]
+  },
+  {
+    id: 'workaround',
+    label: 'Workaround',
+    q: 'Is there a known workaround users can follow right now?',
+    opts: [
+      { t: 'No, there is no workable solution yet', v: 'no' },
+      { t: 'Yes, there is a workaround', v: 'yes' }
+    ]
+  },
+  {
+    id: 'frequency',
+    label: 'Occurrence',
+    q: 'How consistently does the bug happen?',
+    opts: [
+      { t: 'Always, it happens every time', v: 'always' },
+      { t: 'Often, it happens regularly', v: 'often' },
+      { t: 'Rarely, it is intermittent', v: 'rare' }
+    ]
+  }
+];
+
+const sevMap = {
+  critical: {
+    label: 'Critical',
+    color: '#ff4444',
+    sla: 'Highest priority',
+    desc: 'This bug should be handled immediately because it creates major business or user impact.',
+    actions: [
+      'Escalate to the team lead or on-call engineer',
+      'Prioritize investigation right away',
+      'Pause risky releases if necessary',
+      'Communicate status clearly to the team'
+    ]
+  },
+  high: {
+    label: 'High',
+    color: '#ff9900',
+    sla: 'Resolve as soon as possible',
+    desc: 'This bug has serious impact and should be moved near the top of the team backlog.',
+    actions: [
+      'Assign quickly to an experienced developer',
+      'Move it near the top of the sprint backlog',
+      'Track progress closely',
+      'Retest affected functionality before closing'
+    ]
+  },
+  medium: {
+    label: 'Medium',
+    color: '#3b9eff',
+    sla: 'Plan for upcoming sprint',
+    desc: 'This issue matters, but it is not immediately blocking the whole system.',
+    actions: [
+      'Document the issue clearly',
+      'Add it to the backlog with an owner',
+      'Include workaround notes if needed',
+      'Monitor in case the impact grows'
+    ]
+  },
+  low: {
+    label: 'Low',
+    color: '#22c97a',
+    sla: 'Address when capacity allows',
+    desc: 'This bug has limited impact and can usually wait for a future release cycle.',
+    actions: [
+      'Track it in the issue system',
+      'Review during normal backlog grooming',
+      'Consider as a low-priority improvement',
+      'Schedule when there is available time'
+    ]
+  }
+};
+
+let answers = {}, step = 0, history = [];
+
+function classify() {
+  const a = answers;
+  if (a.impact === 'yes') return 'critical';
+  if (a.data === 'yes' && a.users === 'all') return 'critical';
+  if (a.data === 'yes') return 'critical';
+  if (a.users === 'all' && a.workaround === 'no') return 'critical';
+  if (a.users === 'all' && a.workaround === 'yes') return 'high';
+  if (a.users === 'some' && a.workaround === 'no' && a.frequency === 'always') return 'high';
+  if (a.users === 'some' && a.workaround === 'no') return 'medium';
+  if (a.users === 'some' && a.workaround === 'yes') return 'medium';
+  if (a.users === 'few' && a.frequency === 'always') return 'medium';
+  return 'low';
+}
+
+function render() {
+  const qa = document.getElementById('quiz-area');
+  const ra = document.getElementById('result-area');
+  const bb = document.getElementById('back-btn');
+  const rb = document.getElementById('restart-btn');
+  const prog = document.getElementById('prog');
+  const sl = document.getElementById('step-label');
+  const sn = document.getElementById('step-name');
+
+  if (step >= questions.length) {
+    qa.style.display = 'none';
+    ra.style.display = 'block';
+    bb.style.display = 'none';
+    rb.style.display = 'inline-block';
+    prog.style.width = '100%';
+    sl.textContent = 'Complete';
+    sn.textContent = 'Severity estimated';
+
+    const sev = classify();
+    const s = sevMap[sev];
+    ra.innerHTML = `
+      <div style="border:1px solid ${s.color}22;background:${s.color}08;padding:28px">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:${s.color};margin-bottom:10px">Estimated severity</div>
+        <div style="font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;color:${s.color};line-height:1;margin-bottom:6px">${s.label}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:${s.color};opacity:0.6;margin-bottom:18px;letter-spacing:0.1em">${s.sla}</div>
+        <div style="font-size:14px;color:#888896;font-style:italic;line-height:1.65;margin-bottom:22px;max-width:500px">${s.desc}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#55555f;margin-bottom:10px">Suggested response</div>
+        ${s.actions.map(a => `
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #2a2a32;font-size:13px;color:#ccccdd">
+            <span style="width:5px;height:5px;border-radius:50%;background:${s.color};flex-shrink:0;margin-top:7px;display:inline-block"></span>
+            ${a}
+          </div>`).join('')}
+      </div>
+      <div style="margin-top:16px;background:#16161a;border:1px solid #2a2a32;padding:16px 20px">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#55555f;margin-bottom:10px">Your answers</div>
+        ${Object.entries(answers).map(([k,v]) => {
+          const q = questions.find(x => x.id === k);
+          const o = q.opts.find(x => x.v === v);
+          return `<div style="display:flex;justify-content:space-between;gap:16px;font-size:12px;padding:6px 0;border-bottom:1px solid #1e1e24">
+            <span style="color:#55555f;font-family:'DM Mono',monospace">${q.label}</span>
+            <span style="color:#aaaabc;text-align:right">${o.t}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+    return;
+  }
+
+  qa.style.display = 'block';
+  ra.style.display = 'none';
+  rb.style.display = 'none';
+  bb.style.display = history.length > 0 ? 'inline-block' : 'none';
+  prog.style.width = ((step + 1) / questions.length * 100) + '%';
+  sl.textContent = `Step ${step + 1} of ${questions.length}`;
+  sn.textContent = questions[step].label;
+
+  const q = questions[step];
+  qa.innerHTML = `
+    <div class="question-text">${q.q}</div>
+    ${q.opts.map(o => `<button class="opt-btn${answers[q.id] === o.v ? ' selected' : ''}" onclick="choose('${q.id}','${o.v}')">${o.t}</button>`).join('')}
+  `;
+}
+
+function choose(id, val) {
+  history.push({ step, answers: { ...answers } });
+  answers[id] = val;
+  step++;
+  render();
+}
+
+function goBack() {
+  const prev = history.pop();
+  step = prev.step;
+  answers = prev.answers;
+  render();
+}
+
+function restart() {
+  answers = {};
+  step = 0;
+  history = [];
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
