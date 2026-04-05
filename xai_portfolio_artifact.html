@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explainable AI for Large Language Models</title>
+  <meta name="description" content="An interactive portfolio artifact on Explainable AI, validation, and performance metrics for modern large language models." />
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-soft: rgba(255,255,255,0.06);
+      --panel: rgba(8, 16, 32, 0.72);
+      --panel-2: rgba(255,255,255,0.045);
+      --text: #ecf3ff;
+      --muted: #a9b9d0;
+      --line: rgba(255,255,255,0.12);
+      --accent: #6fb4ff;
+      --accent-2: #7ef0d5;
+      --accent-3: #b193ff;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius: 24px;
+      --radius-sm: 18px;
+      --max: 1240px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(111, 180, 255, 0.25), transparent 28%),
+        radial-gradient(circle at 85% 20%, rgba(177, 147, 255, 0.24), transparent 26%),
+        radial-gradient(circle at 50% 80%, rgba(126, 240, 213, 0.16), transparent 28%),
+        linear-gradient(180deg, #06101c 0%, #081322 45%, #050b14 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.4), transparent);
+      opacity: 0.32;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    .wrap { width: min(calc(100% - 32px), var(--max)); margin: 0 auto; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px);
+      background: rgba(5, 11, 20, 0.56);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 14px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(111,180,255,0.95), rgba(177,147,255,0.9));
+      color: #04101f;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 30px rgba(111, 180, 255, 0.28);
+      font-weight: 800;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      font-size: 0.95rem;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .nav-links a:hover { color: var(--text); transform: translateY(-1px); }
+
+    .hero {
+      padding: 76px 0 44px;
+      position: relative;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-copy {
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-copy::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -30% auto;
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(circle, rgba(111,180,255,0.22), transparent 62%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.13);
+      color: #d7e7ff;
+      font-size: 0.88rem;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.7rem, 6vw, 5rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      max-width: 10.5ch;
+    }
+
+    .hero-copy p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.75;
+      max-width: 62ch;
+      margin: 18px 0 0;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      padding: 14px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-weight: 600;
+      transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+    }
+
+    .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); }
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(111,180,255,0.95), rgba(126,240,213,0.88));
+      color: #03101a;
+      border-color: transparent;
+      box-shadow: 0 14px 34px rgba(111,180,255,0.26);
+    }
+
+    .hero-panel {
+      padding: 26px;
+      display: grid;
+      gap: 18px;
+      min-height: 100%;
+    }
+
+    .mini-label {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #bfd3ef;
+      opacity: 0.9;
+    }
+
+    .signal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .signal-card {
+      padding: 18px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 18px;
+    }
+
+    .signal-card h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .signal-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.6;
+    }
+
+    .score-card {
+      padding: 20px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+    }
+
+    .score-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .score-head strong { font-size: 1.02rem; }
+    .score-head span { color: var(--muted); font-size: 0.92rem; }
+
+    .bars { display: grid; gap: 12px; }
+
+    .bar-item { display: grid; gap: 6px; }
+    .bar-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: #d7e8ff;
+    }
+
+    .track {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 24px rgba(111,180,255,0.45);
+      transition: width 0.55s ease;
+    }
+
+    section { padding: 26px 0; }
+
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: clamp(1.7rem, 3.2vw, 2.7rem);
+      letter-spacing: -0.04em;
+    }
+
+    .section-title p {
+      margin: 0;
+      max-width: 70ch;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .grid-3, .grid-4, .grid-2 {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+    .card {
+      padding: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035));
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3, .card h4 {
+      margin: 0 0 10px;
+      letter-spacing: -0.03em;
+    }
+
+    .card p, .card li {
+      color: var(--muted);
+      line-height: 1.68;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      color: #dceaff;
+      font-size: 0.9rem;
+    }
+
+    .flow {
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .flow-step {
+      position: relative;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      min-height: 160px;
+    }
+
+    .flow-step .num {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(111,180,255,0.95), rgba(177,147,255,0.9));
+      color: #02101d;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .flow-step::after {
+      content: "→";
+      position: absolute;
+      top: 18px;
+      right: -14px;
+      font-size: 1.6rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .flow-step:last-child::after { display: none; }
+
+    .company-shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .company-tabs {
+      display: grid;
+      gap: 12px;
+    }
+
+    .company-tab {
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+
+    .company-tab:hover { transform: translateY(-1px); }
+    .company-tab.active {
+      background: linear-gradient(180deg, rgba(111,180,255,0.16), rgba(126,240,213,0.08));
+      border-color: rgba(126,240,213,0.42);
+    }
+
+    .company-tab strong { display: block; margin-bottom: 6px; }
+    .company-tab span { color: var(--muted); font-size: 0.92rem; line-height: 1.55; }
+
+    .company-panel {
+      padding: 26px;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      min-height: 440px;
+      box-shadow: var(--shadow);
+    }
+
+    .company-panel .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 14px;
+      color: #dfeeff;
+      font-size: 0.92rem;
+    }
+
+    .company-panel h3 {
+      font-size: 1.7rem;
+      margin: 0 0 8px;
+    }
+
+    .company-panel p {
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 74ch;
+    }
+
+    .company-list {
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+
+    .company-list li {
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .company-list strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #eff6ff;
+    }
+
+    .metric-board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+      padding: 24px;
+    }
+
+    .control-group { display: grid; gap: 10px; }
+    .control-group label {
+      font-size: 0.92rem;
+      color: #d7e7ff;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #8fccff;
+    }
+
+    .summary-box {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .trust-score {
+      padding: 20px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(111,180,255,0.18), rgba(177,147,255,0.12));
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .trust-score .value {
+      font-size: clamp(2.2rem, 4vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+    }
+
+    .legend {
+      display: grid;
+      gap: 10px;
+    }
+
+    .legend div {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+      padding-bottom: 10px;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .timeline-item .stamp {
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #cde2ff;
+      font-size: 1.02rem;
+    }
+
+    .cta {
+      padding: 34px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta::before {
+      content: "";
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(111,180,255,0.16), transparent 62%);
+      pointer-events: none;
+    }
+
+    .cta h2 { margin: 0 0 10px; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.05em; }
+    .cta p { color: var(--muted); max-width: 72ch; margin: 0 auto; line-height: 1.8; }
+
+    .footer {
+      padding: 24px 0 42px;
+      color: #90a6c2;
+      font-size: 0.92rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid, .metric-board, .company-shell, .grid-4, .grid-3, .flow-grid { grid-template-columns: 1fr 1fr; }
+      .company-shell { grid-template-columns: 1fr; }
+      .flow-step::after { display: none; }
+    }
+
+    @media (max-width: 760px) {
+      .nav { flex-direction: column; align-items: flex-start; }
+      .hero-grid, .metric-board, .grid-4, .grid-3, .grid-2, .flow-grid, .signal-grid { grid-template-columns: 1fr; }
+      .hero { padding-top: 46px; }
+      .hero-copy, .hero-panel, .card, .flow, .company-panel, .controls, .summary-box, .cta { padding: 22px; }
+      h1 { max-width: unset; }
+      .timeline-item { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="wrap nav">
+      <a class="brand" href="#top">
+        <div class="brand-badge">X</div>
+        <div>
+          <div>Explainable AI</div>
+          <div style="font-size:0.82rem;color:var(--muted);font-weight:500;">Portfolio Artifact</div>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="#importance">Why it matters</a>
+        <a href="#challenges">Challenges</a>
+        <a href="#leaders">Industry efforts</a>
+        <a href="#metrics">Metrics lab</a>
+        <a href="#trust">Trust stack</a>
+      </div>
+    </div>
+  </div>
+
+  <main id="top">
+    <section class="hero wrap">
+      <div class="hero-grid">
+        <div class="hero-copy glass reveal show">
+          <div class="eyebrow">Transparent AI is not optional when decisions affect people</div>
+          <h1>Making black box AI easier to trust.</h1>
+          <p>
+            Large language models can generate impressive answers, but real world adoption depends on something deeper than raw capability. We need systems that are explainable, testable, and measurable. This interactive artifact shows where explainability breaks down, how major AI organizations are improving transparency, and why validation plus performance metrics are essential for trustworthy deployment.
+          </p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#leaders">Explore current industry efforts</a>
+            <a class="btn" href="#metrics">Try the trust calculator</a>
+          </div>
+        </div>
+
+        <div class="hero-panel glass reveal show">
+          <div class="mini-label">Trust signals at a glance</div>
+          <div class="signal-grid">
+            <div class="signal-card">
+              <h3>Explainability</h3>
+              <p>Helps humans understand what influenced an answer, where confidence should be high, and where oversight is necessary.</p>
+            </div>
+            <div class="signal-card">
+              <h3>Validation</h3>
+              <p>Stress tests whether the model stays reliable across new prompts, edge cases, and failure scenarios.</p>
+            </div>
+            <div class="signal-card">
+              <h3>Performance metrics</h3>
+              <p>Turns vague claims into measurable evidence using accuracy, calibration, robustness, fairness, and safety evaluations.</p>
+            </div>
+            <div class="signal-card">
+              <h3>Accountability</h3>
+              <p>Documentation, audits, model cards, and system cards make organizational choices visible instead of hidden.</p>
+            </div>
+          </div>
+          <div class="score-card">
+            <div class="score-head">
+              <div>
+                <strong>Trustworthy AI depends on balance</strong>
+                <span>Strong outputs alone are never enough</span>
+              </div>
+            </div>
+            <div class="bars">
+              <div class="bar-item">
+                <div class="bar-top"><span>Capability</span><span>94</span></div>
+                <div class="track"><div class="fill" style="width:94%"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Explainability</span><span>61</span></div>
+                <div class="track"><div class="fill" style="width:61%"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Validation coverage</span><span>78</span></div>
+                <div class="track"><div class="fill" style="width:78%"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="bar-top"><span>Human oversight</span><span>73</span></div>
+                <div class="track"><div class="fill" style="width:73%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="importance" class="wrap reveal">
+      <div class="section-title">
+        <div>
+          <h2>Explainable AI matters because powerful models can still be opaque.</h2>
+        </div>
+        <p>
+          In healthcare, finance, law, education, and enterprise automation, people need more than polished output. They need evidence that a model was evaluated, monitored, and designed with transparency in mind. Explainability supports oversight, validation supports reliability, and metrics support accountability.
+        </p>
+      </div>
+      <div class="grid-4">
+        <article class="card">
+          <h3>Human trust</h3>
+          <p>Users are more likely to rely on AI when they can inspect the reasoning signals, limitations, and known failure patterns behind responses.</p>
+          <div class="pill-row">
+            <span class="pill">Confidence</span>
+            <span class="pill">Interpretability</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3>Safer deployment</h3>
+          <p>When explanations and evaluations surface weak spots early, organizations can reduce harmful outputs, bias, and brittle behavior before release.</p>
+          <div class="pill-row">
+            <span class="pill">Red teaming</span>
+            <span class="pill">Guardrails</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3>Better debugging</h3>
+          <p>Transparency tools help researchers identify whether a problem came from data, prompt handling, calibration, instruction following, or internal features.</p>
+          <div class="pill-row">
+            <span class="pill">Tracing</span>
+            <span class="pill">Probing</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3>Regulatory readiness</h3>
+          <p>Documented testing, reproducible metrics, and clear limitations help organizations respond to governance expectations and audit demands.</p>
+          <div class="pill-row">
+            <span class="pill">Governance</span>
+            <span class="pill">Documentation</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="challenges" class="wrap reveal">
+      <div class="section-title">
+        <div>
+          <h2>The main obstacles to explaining LLM decisions</h2>
+        </div>
+        <p>
+          Modern generative AI does not reason through a single neat path. Outputs emerge from distributed patterns spread across huge numbers of parameters, training signals, and context interactions. That is why explainability often lags behind capability.
+        </p>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <h3>1. Internal complexity</h3>
+          <p>LLMs rely on deep non linear representations. No single neuron or parameter cleanly explains the final response. The answer is an emergent effect of many interacting features.</p>
+        </article>
+        <article class="card">
+          <h3>2. Post hoc limits</h3>
+          <p>Some explanations are generated after the fact. They can sound plausible without perfectly matching the model's true internal mechanism, which weakens trust.</p>
+        </article>
+        <article class="card">
+          <h3>3. Training data opacity</h3>
+          <p>Bias, noise, omissions, and representation gaps from large training corpora can shape outputs in ways that are difficult to isolate or fully trace later.</p>
+        </article>
+        <article class="card">
+          <h3>4. Prompt sensitivity</h3>
+          <p>Small wording changes can alter the path the model takes. This makes explanations unstable because the same task can produce different responses under slightly different inputs.</p>
+        </article>
+        <article class="card">
+          <h3>5. Hidden failure modes</h3>
+          <p>Hallucinations, overconfidence, unsafe suggestions, and latent bias do not always appear in benchmark averages. They often show up at the edges.</p>
+        </article>
+        <article class="card">
+          <h3>6. Regulation and accountability</h3>
+          <p>As AI moves into high stakes environments, organizations need evidence they can document, explain, and defend. Capability without transparency is not enough.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap reveal">
+      <div class="flow glass">
+        <div class="section-title" style="margin-bottom:0;">
+          <div>
+            <h2>How trustworthy AI is built</h2>
+          </div>
+          <p>
+            Trust comes from a stack of design and evaluation decisions, not from one magic explanation feature.
+          </p>
+        </div>
+        <div class="flow-grid">
+          <div class="flow-step">
+            <div class="num">1</div>
+            <h4>Data quality</h4>
+            <p>Curate, filter, and document data sources so the model is grounded in cleaner signals.</p>
+          </div>
+          <div class="flow-step">
+            <div class="num">2</div>
+            <h4>Model development</h4>
+            <p>Train and align the model while monitoring safety, harmful behaviors, and capability shifts.</p>
+          </div>
+          <div class="flow-step">
+            <div class="num">3</div>
+            <h4>Interpretability tools</h4>
+            <p>Use tracing, feature analysis, attention studies, and reasoning analysis to inspect internal behavior.</p>
+          </div>
+          <div class="flow-step">
+            <div class="num">4</div>
+            <h4>Validation and evals</h4>
+            <p>Measure reliability, robustness, safety, fairness, and consistency across benchmarks and adversarial tests.</p>
+          </div>
+          <div class="flow-step">
+            <div class="num">5</div>
+            <h4>Deployment oversight</h4>
+            <p>Continue logging, auditing, monitoring, and refining the system after release in real use.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="leaders" class="wrap reveal">
+      <div class="section-title">
+        <div>
+          <h2>Current industry efforts to improve explainability and transparency</h2>
+        </div>
+        <p>
+          Leading organizations are not solving explainability in exactly the same way. Instead, they are building overlapping layers such as system cards, model cards, interpretability research, safety evaluations, and public documentation of limitations.
+        </p>
+      </div>
+      <div class="company-shell">
+        <div class="company-tabs">
+          <button class="company-tab active" data-company="openai">
+            <strong>OpenAI</strong>
+            <span>System cards, model behavior documentation, preparedness style safety work, and monitoring research</span>
+          </button>
+          <button class="company-tab" data-company="anthropic">
+            <strong>Anthropic</strong>
+            <span>Interpretability, constitutional training methods, transparency hub, and circuit tracing research</span>
+          </button>
+          <button class="company-tab" data-company="google">
+            <strong>Google DeepMind</strong>
+            <span>Model cards, accountable AI documentation, and explainability resources connected to responsible AI</span>
+          </button>
+          <button class="company-tab" data-company="meta">
+            <strong>Meta</strong>
+            <span>Model cards, system cards, and transparency oriented responsible AI communication around Llama</span>
+          </button>
+        </div>
+        <div class="company-panel" id="company-panel"></div>
+      </div>
+    </section>
+
+    <section id="metrics" class="wrap reveal">
+      <div class="section-title">
+        <div>
+          <h2>Validation and performance metrics lab</h2>
+        </div>
+        <p>
+          Metrics make trustworthy AI measurable. Use the controls below to simulate how validation coverage affects a model's overall trust profile. This is an educational visualization, not a score from any one real model.
+        </p>
+      </div>
+      <div class="metric-board">
+        <div class="glass controls">
+          <div class="control-group">
+            <label><span>Accuracy / task performance</span><strong id="accOut">84</strong></label>
+            <input id="accuracy" type="range" min="0" max="100" value="84" />
+          </div>
+          <div class="control-group">
+            <label><span>Robustness to edge cases</span><strong id="robOut">71</strong></label>
+            <input id="robustness" type="range" min="0" max="100" value="71" />
+          </div>
+          <div class="control-group">
+            <label><span>Calibration / confidence quality</span><strong id="calOut">67</strong></label>
+            <input id="calibration" type="range" min="0" max="100" value="67" />
+          </div>
+          <div class="control-group">
+            <label><span>Safety evaluation coverage</span><strong id="safeOut">76</strong></label>
+            <input id="safety" type="range" min="0" max="100" value="76" />
+          </div>
+          <div class="control-group">
+            <label><span>Explainability documentation</span><strong id="expOut">63</strong></label>
+            <input id="explainability" type="range" min="0" max="100" value="63" />
+          </div>
+        </div>
+        <div class="glass summary-box">
+          <div class="trust-score">
+            <div style="color:#d7e7ff;font-size:0.95rem;margin-bottom:6px;">Composite trust score</div>
+            <div class="value" id="trustValue">72</div>
+            <div class="note" id="trustLabel">Promising, but still needs strong human oversight for higher stakes decisions.</div>
+          </div>
+          <div class="legend" id="legend"></div>
+          <div class="note">
+            Strong performance alone can mask important weaknesses. A model with high benchmark scores but low calibration or low safety coverage may still fail in real conditions.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="trust" class="wrap reveal">
+      <div class="section-title">
+        <div>
+          <h2>A practical trust stack for generative AI</h2>
+        </div>
+        <p>
+          The most reliable path is layered. Organizations should combine interpretability work, validation, documentation, and human governance rather than treating explainability as a one time checkbox.
+        </p>
+      </div>
+      <div class="grid-2">
+        <article class="card">
+          <h3>Core validation methods</h3>
+          <ul>
+            <li>Benchmark testing across representative tasks</li>
+            <li>Adversarial prompting and red team exercises</li>
+            <li>Bias and fairness evaluations across groups and contexts</li>
+            <li>Stress tests for hallucination, instability, and prompt sensitivity</li>
+            <li>Human review for nuanced or high stakes use cases</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Core explainability techniques</h3>
+          <ul>
+            <li>Attention and attribution style visualizations</li>
+            <li>Probing and feature analysis of internal representations</li>
+            <li>Tracing, circuit analysis, and reasoning inspection</li>
+            <li>System cards, model cards, and public transparency reports</li>
+            <li>Clear disclosure of limitations, failure modes, and intended use</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="wrap reveal">
+      <div class="section-title">
+        <div>
+          <h2>Why this matters in real deployment</h2>
+        </div>
+        <p>
+          Explainability is not just an academic idea. It directly affects whether AI systems can be adopted responsibly in environments where errors carry consequences.
+        </p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="stamp">Health</div>
+          <div>
+            <strong>Clinicians need interpretable signals before trusting recommendations.</strong>
+            <div class="note">A persuasive answer without evidence or confidence awareness can introduce serious risk.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="stamp">Finance</div>
+          <div>
+            <strong>Auditable reasoning and documented limitations support compliance and fairness.</strong>
+            <div class="note">Institutions need measurable validation, not just impressive demos.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="stamp">Law</div>
+          <div>
+            <strong>Opaque outputs can create false confidence in research, drafting, or decision support.</strong>
+            <div class="note">Traceability and human review are essential where interpretation matters.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="stamp">Enterprise</div>
+          <div>
+            <strong>Reliable automation depends on guardrails, continuous monitoring, and transparent documentation.</strong>
+            <div class="note">Trust grows when organizations can explain what the model was tested on and where it should not be used.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap reveal">
+      <div class="cta glass">
+        <h2>Explainability, validation, and metrics work together.</h2>
+        <p>
+          Explainability helps people understand model behavior. Validation checks whether that behavior stays reliable in the real world. Performance metrics turn reliability into evidence. Together, they move AI from impressive output toward trustworthy systems.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    Designed as a portfolio artifact on Explainable AI for large language models, with an emphasis on clarity, modern presentation, and interactive learning.
+  </footer>
+
+  <script>
+    const companyData = {
+      openai: {
+        badge: 'OpenAI',
+        title: 'OpenAI focuses on public behavior documentation, system cards, and evaluation oriented safety work.',
+        body: 'OpenAI has published system cards and behavior documentation to make model behavior easier to inspect and discuss. Its public safety materials emphasize red teaming, preparedness style evaluations, and ongoing monitoring research. This approach treats transparency as a layered practice rather than a single explainability feature.',
+        items: [
+          ['System cards', 'Summarize capabilities, risks, limitations, and mitigation findings around specific model releases.'],
+          ['Model behavior documentation', 'Documents how the organization wants models to behave and why those behavioral choices matter.'],
+          ['Reasoning and monitoring research', 'Explores how to observe hidden or problematic behavior more effectively during evaluation and deployment.']
+        ]
+      },
+      anthropic: {
+        badge: 'Anthropic',
+        title: 'Anthropic emphasizes interpretability research, transparency reporting, and constitutional style alignment.',
+        body: 'Anthropic has invested heavily in interpretability and alignment science, including work on circuit tracing and transparency documentation. Its public materials frame evaluations as central to accountability and view interpretability as a route toward understanding internal mechanisms rather than only surface outputs.',
+        items: [
+          ['Transparency hub and system cards', 'Provides model level and safety related documentation intended to make evaluation and governance more visible.'],
+          ['Interpretability research', 'Investigates how internal model features and circuits contribute to behavior.'],
+          ['Constitutional AI and evaluation focus', 'Uses structured alignment methods and extensive evaluation as part of responsible deployment.']
+        ]
+      },
+      google: {
+        badge: 'Google DeepMind',
+        title: 'Google connects explainability to accountable AI through model cards, documentation, and responsible AI guidance.',
+        body: 'Google DeepMind publishes model cards for its generative models and maintains responsible AI guidance that links transparency, accountability, interpretability, and explainability. The organization treats documentation as part of operational accountability, not just a research afterthought.',
+        items: [
+          ['Model cards', 'Structured summaries of design intent, evaluation, and use considerations for deployed models.'],
+          ['Responsible AI guidance', 'Explains how accountability, transparency, and explainability fit into trustworthy AI practice.'],
+          ['Explainability resources', 'Supports understanding of feature level influence and decision interpretation in practical workflows.']
+        ]
+      },
+      meta: {
+        badge: 'Meta',
+        title: 'Meta highlights model cards, system cards, and responsible AI transparency around open model releases.',
+        body: 'Meta has discussed model cards and system cards as part of its responsible AI transparency efforts. For open model ecosystems, this kind of documentation is especially useful because downstream users need clear information about evaluation, intended use, and limitations.',
+        items: [
+          ['Model and system cards', 'Offer structured disclosures on design, capabilities, and risks.'],
+          ['Responsible AI communication', 'Frames transparency as part of broader fairness and accountability work.'],
+          ['Open ecosystem relevance', 'Documentation becomes even more important when others build on top of foundation models.']
+        ]
+      }
+    };
+
+    const panel = document.getElementById('company-panel');
+    const tabs = document.querySelectorAll('.company-tab');
+
+    function renderCompany(key) {
+      const company = companyData[key];
+      panel.innerHTML = `
+        <div class="logo">Current industry snapshot · ${company.badge}</div>
+        <h3>${company.title}</h3>
+        <p>${company.body}</p>
+        <ul class="company-list">
+          ${company.items.map(([title, desc]) => `<li><strong>${title}</strong>${desc}</li>`).join('')}
+        </ul>
+      `;
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderCompany(tab.dataset.company);
+      });
+    });
+    renderCompany('openai');
+
+    const controls = {
+      accuracy: document.getElementById('accuracy'),
+      robustness: document.getElementById('robustness'),
+      calibration: document.getElementById('calibration'),
+      safety: document.getElementById('safety'),
+      explainability: document.getElementById('explainability')
+    };
+
+    const outputs = {
+      accuracy: document.getElementById('accOut'),
+      robustness: document.getElementById('robOut'),
+      calibration: document.getElementById('calOut'),
+      safety: document.getElementById('safeOut'),
+      explainability: document.getElementById('expOut')
+    };
+
+    const trustValue = document.getElementById('trustValue');
+    const trustLabel = document.getElementById('trustLabel');
+    const legend = document.getElementById('legend');
+
+    function computeTrust() {
+      const values = Object.fromEntries(Object.entries(controls).map(([k, el]) => [k, Number(el.value)]));
+      Object.entries(values).forEach(([k, v]) => outputs[k].textContent = v);
+
+      const weighted = (
+        values.accuracy * 0.23 +
+        values.robustness * 0.22 +
+        values.calibration * 0.17 +
+        values.safety * 0.22 +
+        values.explainability * 0.16
+      );
+      const score = Math.round(weighted);
+      trustValue.textContent = score;
+
+      let label = 'Low trust profile. Deployment should remain tightly constrained and heavily supervised.';
+      if (score >= 85) label = 'Strong trust profile. Still benefits from human governance, but the validation stack is comparatively mature.';
+      else if (score >= 70) label = 'Promising, but still needs strong human oversight for higher stakes decisions.';
+      else if (score >= 55) label = 'Mixed trust profile. Useful in bounded settings, but important reliability gaps remain.';
+
+      trustLabel.textContent = label;
+
+      const entries = [
+        ['Accuracy', values.accuracy],
+        ['Robustness', values.robustness],
+        ['Calibration', values.calibration],
+        ['Safety', values.safety],
+        ['Explainability', values.explainability]
+      ].sort((a, b) => b[1] - a[1]);
+
+      legend.innerHTML = entries.map(([name, value]) => `<div><span>${name}</span><strong style="color:#eaf3ff;">${value}</strong></div>`).join('');
+    }
+
+    Object.values(controls).forEach(el => el.addEventListener('input', computeTrust));
+    computeTrust();
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('show');
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
