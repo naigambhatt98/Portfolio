@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model Trade-Off Matrix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    :root {
+      --bg0: #050d15;
+      --bg1: #081220;
+      --glass: rgba(255,255,255,0.045);
+      --glass-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.09);
+      --border-hover: rgba(255,255,255,0.18);
+      --text: #e8f2ff;
+      --muted: #7a9dbf;
+      --faint: #3d5a75;
+      --blue: #5ba4f5;
+      --cyan: #4dd9f0;
+      --green: #4dfaa0;
+      --amber: #f5b54d;
+      --purple: #a67ff5;
+      --nlp-bg: rgba(91,164,245,0.12);
+      --nlp-border: rgba(91,164,245,0.25);
+      --nlp-text: #93c5fd;
+      --vision-bg: rgba(77,217,240,0.10);
+      --vision-border: rgba(77,217,240,0.22);
+      --vision-text: #7dd8ea;
+      --tabular-bg: rgba(166,127,245,0.10);
+      --tabular-border: rgba(166,127,245,0.22);
+      --tabular-text: #c4a6f7;
+      --r-lg: 24px;
+      --max: 1160px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg0);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 5% 0%, rgba(91,164,245,0.14) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 35% at 95% 8%, rgba(77,217,240,0.10) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 50% at 50% 100%, rgba(166,127,245,0.08) 0%, transparent 60%),
+        linear-gradient(180deg, #060e18 0%, #081220 50%, #050d15 100%);
+      pointer-events: none; z-index: 0;
+    }
+    .wrap {
+      position: relative; z-index: 2;
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    /* NAV */
+    .nav { position: sticky; top: 0; z-index: 100; }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 58px; gap: 16px;
+      margin: 14px auto;
+      width: min(var(--max), calc(100% - 40px));
+      background: rgba(8,18,32,0.78);
+      backdrop-filter: blur(24px) saturate(1.4);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0 20px 0 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 0.88rem; font-weight: 700; }
+    .brand-icon {
+      width: 32px; height: 32px; border-radius: 10px;
+      background: linear-gradient(135deg, rgba(91,164,245,0.2), rgba(77,217,240,0.12));
+      border: 1px solid var(--border-hover);
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+    .nav-links { display: flex; gap: 2px; }
+    .nav-links a {
+      font-size: 13px; color: var(--muted); padding: 7px 14px;
+      border-radius: 999px; transition: all 0.18s; font-weight: 500;
+      text-decoration: none;
+    }
+    .nav-links a:hover { background: var(--glass); color: var(--text); }
+
+    /* HERO */
+    .hero { padding: 88px 0 72px; }
+    .hero-layout {
+      display: grid; grid-template-columns: 1.15fr 0.85fr;
+      gap: 32px; align-items: center;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--cyan); background: rgba(77,217,240,0.1);
+      border: 1px solid rgba(77,217,240,0.2);
+      padding: 6px 12px; border-radius: 999px; margin-bottom: 24px;
+    }
+    .eyebrow-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
+    h1 {
+      font-size: clamp(2.6rem, 5vw, 4.8rem);
+      font-weight: 800; line-height: 0.95;
+      letter-spacing: -0.04em; margin-bottom: 22px;
+    }
+    h1 .accent { color: var(--blue); }
+    .hero-lead { color: var(--muted); font-size: 15px; line-height: 1.75; max-width: 52ch; margin-bottom: 32px; font-weight: 400; }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      padding: 11px 22px; border-radius: 999px;
+      font-size: 13px; font-weight: 700; letter-spacing: 0.02em;
+      border: 1px solid var(--border-hover);
+      background: var(--glass); color: var(--text);
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'Syne', sans-serif; text-decoration: none; display: inline-block;
+    }
+    .btn:hover { background: var(--glass-hover); border-color: var(--muted); transform: translateY(-1px); }
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(91,164,245,0.22), rgba(77,217,240,0.14));
+      border-color: rgba(91,164,245,0.35); color: var(--blue);
+    }
+    .btn.primary:hover { background: linear-gradient(135deg, rgba(91,164,245,0.32), rgba(77,217,240,0.22)); }
+
+    /* STAT CARD */
+    .stat-card {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: var(--r-lg); backdrop-filter: blur(20px); overflow: hidden;
+    }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .stat-cell {
+      padding: 24px 22px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-cell:nth-child(2n) { border-right: none; }
+    .stat-cell:nth-child(3), .stat-cell:nth-child(4) { border-bottom: none; }
+    .stat-num { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.05em; line-height: 1; margin-bottom: 4px; }
+    .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+    .stat-note { padding: 16px 22px; font-size: 12px; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--border); }
+
+    /* INSIGHTS */
+    .insights-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 64px; }
+    .insight-card {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 26px 24px;
+      backdrop-filter: blur(16px); position: relative; overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .insight-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+    .insight-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--ic, var(--blue)), transparent);
+      opacity: 0.7;
+    }
+    .insight-num {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--ic, var(--blue)); margin-bottom: 14px; font-family: 'Space Mono', monospace;
+    }
+    .insight-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .insight-card p { font-size: 13px; color: var(--muted); line-height: 1.65; font-weight: 400; }
+
+    /* SECTIONS */
+    .section-wrap { margin-bottom: 64px; }
+    .section-hd {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 16px; margin-bottom: 20px; padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    h2 { font-size: clamp(1.5rem, 2.5vw, 2.1rem); font-weight: 800; letter-spacing: -0.03em; }
+    .section-sub { font-size: 13px; color: var(--muted); font-weight: 400; }
+
+    /* CHIPS */
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+    .chip {
+      padding: 7px 16px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.02em;
+      border: 1px solid var(--border); background: var(--glass); color: var(--muted);
+      cursor: pointer; transition: all 0.15s; font-family: 'Syne', sans-serif;
+    }
+    .chip:hover { border-color: var(--border-hover); color: var(--text); }
+    .chip.active {
+      background: linear-gradient(135deg, rgba(91,164,245,0.18), rgba(77,217,240,0.10));
+      border-color: rgba(91,164,245,0.3); color: var(--blue);
+    }
+
+    /* MODEL CARDS */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px,1fr)); gap: 12px; }
+    .model-card {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 24px;
+      cursor: pointer; backdrop-filter: blur(16px);
+      transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .model-card:hover { border-color: var(--border-hover); transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
+    .model-card.selected { border-color: rgba(91,164,245,0.45); box-shadow: 0 0 0 1px rgba(91,164,245,0.25), 0 16px 48px rgba(0,0,0,0.4); }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+    .model-name { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; }
+    .domain-pill {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 9px; border-radius: 999px; border: 1px solid; white-space: nowrap; flex-shrink: 0;
+      font-family: 'Space Mono', monospace;
+    }
+    .model-size { font-size: 11px; color: var(--faint); font-family: 'Space Mono', monospace; margin-bottom: 20px; }
+    .metrics { display: flex; flex-direction: column; gap: 11px; margin-bottom: 18px; }
+    .metric-row { display: flex; flex-direction: column; gap: 5px; }
+    .metric-top { display: flex; justify-content: space-between; align-items: center; }
+    .metric-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; font-family: 'Space Mono', monospace; }
+    .metric-score { font-size: 11px; font-weight: 700; font-family: 'Space Mono', monospace; }
+    .bar-track { height: 4px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
+    .explain-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .explain-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; font-family: 'Space Mono', monospace; }
+    .explain-badge { font-size: 10px; padding: 3px 9px; border-radius: 999px; font-weight: 700; font-family: 'Space Mono', monospace; border: 1px solid; }
+    .explain-good { background: rgba(77,250,160,0.1); color: #4dfaa0; border-color: rgba(77,250,160,0.25); }
+    .explain-mid  { background: rgba(91,164,245,0.1); color: #5ba4f5; border-color: rgba(91,164,245,0.25); }
+    .explain-low  { background: rgba(245,181,77,0.1);  color: #f5b54d; border-color: rgba(245,181,77,0.25); }
+    .card-divider { height: 1px; background: var(--border); margin-bottom: 14px; }
+    .card-fit { font-size: 12px; color: var(--muted); line-height: 1.6; font-weight: 400; }
+
+    /* CHARTS */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .chart-card {
+      background: var(--glass); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 24px; backdrop-filter: blur(16px);
+    }
+    .chart-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 18px; font-family: 'Space Mono', monospace; }
+    .chart-box { position: relative; width: 100%; height: 260px; }
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* RECOMMENDATIONS */
+    .rec-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .rec-card { border-radius: var(--r-lg); padding: 26px 24px; border: 1px solid var(--border); backdrop-filter: blur(16px); position: relative; overflow: hidden; }
+    .rec-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; opacity: 0.7; }
+    .rec-speed   { background: linear-gradient(160deg, rgba(77,250,160,0.07), var(--glass)); }
+    .rec-speed::before   { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+    .rec-balance { background: linear-gradient(160deg, rgba(91,164,245,0.07), var(--glass)); }
+    .rec-balance::before { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+    .rec-power   { background: linear-gradient(160deg, rgba(245,181,77,0.07), var(--glass)); }
+    .rec-power::before   { background: linear-gradient(90deg, transparent, var(--amber), transparent); }
+    .rec-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; font-family: 'Space Mono', monospace; }
+    .rec-card h3 { font-size: 1rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .rec-card p { font-size: 13px; color: var(--muted); line-height: 1.6; font-weight: 400; margin-bottom: 14px; }
+    .rec-models { display: flex; gap: 6px; flex-wrap: wrap; }
+    .rec-model { font-size: 10px; padding: 3px 9px; border-radius: 999px; font-family: 'Space Mono', monospace; font-weight: 700; border: 1px solid var(--border-hover); color: var(--muted); }
+
+    /* FOOTER */
+    .foot {
+      padding: 28px 0 56px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .foot-text { font-size: 11px; color: var(--faint); font-family: 'Space Mono', monospace; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .anim { opacity:0; animation: fadeUp 0.6s ease forwards; }
+    .d1{animation-delay:.05s}.d2{animation-delay:.12s}.d3{animation-delay:.19s}
+    .d4{animation-delay:.26s}.d5{animation-delay:.33s}.d6{animation-delay:.4s}
+
+    @media (max-width:900px) {
+      .hero-layout,.charts-grid,.rec-grid,.insights-row{grid-template-columns:1fr;}
+      h1{max-width:none;}
+    }
+    @media (max-width:600px) {
+      .hero{padding:56px 0 48px;}
+      .cards-grid{grid-template-columns:1fr;}
+      .nav-links{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-icon">⚖</div>
+      Model Trade-Off Matrix
+    </div>
+    <div class="nav-links">
+      <a href="#overview">Overview</a>
+      <a href="#matrix">Matrix</a>
+      <a href="#charts">Charts</a>
+      <a href="#recommendations">Rec's</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap anim d1" id="overview">
+  <div class="hero">
+    <div class="hero-layout">
+      <div>
+        <div class="eyebrow"><span class="eyebrow-dot"></span>Portfolio Artifact</div>
+        <h1>Model choice is a <span class="accent">balance,</span><br>not a race.</h1>
+        <p class="hero-lead">Comparing representative models across NLP, computer vision, and tabular ML — showing how size, accuracy, speed, and explainability shape real deployment decisions.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#matrix">View matrix</a>
+          <a class="btn" href="#recommendations">Recommendations</a>
+        </div>
+      </div>
+      <div class="stat-card anim d3">
+        <div class="stat-grid">
+          <div class="stat-cell"><div class="stat-num" style="color:var(--blue)">3</div><div class="stat-lbl">Domains</div></div>
+          <div class="stat-cell"><div class="stat-num" style="color:var(--cyan)">6</div><div class="stat-lbl">Models</div></div>
+          <div class="stat-cell"><div class="stat-num" style="color:var(--purple)">4</div><div class="stat-lbl">Factors</div></div>
+          <div class="stat-cell"><div class="stat-num" style="font-size:1.4rem;color:var(--green)">Best<br>fit</div><div class="stat-lbl">Goal</div></div>
+        </div>
+        <div class="stat-note">Scores are normalized from published benchmarks. The goal is clarity for selection, not fake 1:1 equivalence across domains.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap anim d4">
+  <div class="insights-row">
+    <div class="insight-card" style="--ic:var(--blue)">
+      <div class="insight-num">01 — Size vs Speed</div>
+      <h3>Smaller usually means faster</h3>
+      <p>Compact models reduce memory pressure, improve responsiveness, and are easier to deploy on constrained hardware.</p>
+    </div>
+    <div class="insight-card" style="--ic:var(--cyan)">
+      <div class="insight-num">02 — Cost of Capability</div>
+      <h3>Higher capability costs more</h3>
+      <p>Larger models improve performance ceilings but increase latency, infrastructure cost, and governance burden.</p>
+    </div>
+    <div class="insight-card" style="--ic:var(--purple)">
+      <div class="insight-num">03 — Transparency</div>
+      <h3>Explainability changes the answer</h3>
+      <p>For structured data, models like LightGBM can be easier to justify than heavier black-box systems.</p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap section-wrap anim d5" id="matrix">
+  <div class="section-hd">
+    <div>
+      <h2>Decision matrix</h2>
+      <p class="section-sub">Filter by domain. Scores are relative decision signals for practical model selection.</p>
+    </div>
+  </div>
+  <div class="chips" id="domain-chips">
+    <button class="chip active" data-domain="all">All models</button>
+    <button class="chip" data-domain="nlp">NLP / Generative</button>
+    <button class="chip" data-domain="vision">Computer vision</button>
+    <button class="chip" data-domain="tabular">Tabular</button>
+  </div>
+  <div class="cards-grid" id="cards-grid"></div>
+</div>
+
+<div class="wrap section-wrap" id="charts">
+  <div class="section-hd">
+    <div>
+      <h2>Score comparison</h2>
+      <p class="section-sub">Visual breakdown across key dimensions.</p>
+    </div>
+  </div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Accuracy vs Speed — bubble size = explainability</div>
+      <div class="chart-box"><canvas id="bubbleChart" role="img" aria-label="Bubble chart comparing accuracy and speed.">Bubble chart.</canvas></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#5ba4f5"></div>NLP</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#4dd9f0"></div>Vision</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#a67ff5"></div>Tabular</div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">All models — accuracy &amp; speed scores</div>
+      <div class="chart-box"><canvas id="barChart" role="img" aria-label="Horizontal bar chart of model scores.">Bar chart.</canvas></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#5ba4f5"></div>Accuracy</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#4dfaa0"></div>Speed</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap section-wrap" id="recommendations">
+  <div class="section-hd">
+    <div>
+      <h2>Recommendations</h2>
+      <p class="section-sub">The best model depends on the environment, not just the benchmark headline.</p>
+    </div>
+  </div>
+  <div class="rec-grid">
+    <div class="rec-card rec-speed">
+      <div class="rec-label" style="color:var(--green)">⚡ Speed first</div>
+      <h3>Latency &amp; cost wins</h3>
+      <p>When operational simplicity and throughput matter most, choose the lightest options available.</p>
+      <div class="rec-models">
+        <span class="rec-model">DistilBERT</span>
+        <span class="rec-model">MobileNetV3</span>
+        <span class="rec-model">LightGBM</span>
+      </div>
+    </div>
+    <div class="rec-card rec-balance">
+      <div class="rec-label" style="color:var(--blue)">⚖ Balanced production</div>
+      <h3>Strong &amp; practical</h3>
+      <p>Stronger performance while remaining deployable for most real-world systems and budgets.</p>
+      <div class="rec-models">
+        <span class="rec-model">BERT base</span>
+        <span class="rec-model">EfficientNet B0</span>
+      </div>
+    </div>
+    <div class="rec-card rec-power">
+      <div class="rec-label" style="color:var(--amber)">🔥 Capability heavy</div>
+      <h3>Go big when it counts</h3>
+      <p>When richer generative behavior justifies higher memory, control overhead, and operational complexity.</p>
+      <div class="rec-models">
+        <span class="rec-model">Llama 3.1 8B</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="foot">
+    <div class="foot-text">Portfolio artifact — model selection across NLP, vision &amp; tabular AI</div>
+    <div class="foot-text">Scores are normalized relative signals, not absolute benchmarks</div>
+  </div>
+</div>
+
+<script>
+  const models = [
+    { name:'DistilBERT',      domain:'nlp',     domainLabel:'NLP / Encoder',   size:'66M params',        accuracyScore:78, speedScore:86, explainability:'Medium',     explainClass:'mid',  explainScore:55, fit:'Fast text classification and lightweight NLP pipelines.' },
+    { name:'BERT base',       domain:'nlp',     domainLabel:'NLP / Encoder',   size:'110M params',       accuracyScore:82, speedScore:58, explainability:'Medium',     explainClass:'mid',  explainScore:55, fit:'Balanced language understanding for production NLP.' },
+    { name:'Llama 3.1 8B',    domain:'nlp',     domainLabel:'Generative AI',   size:'8B params',         accuracyScore:88, speedScore:34, explainability:'Low–medium', explainClass:'low',  explainScore:30, fit:'Open-weight chat and generation workflows.' },
+    { name:'MobileNetV3',     domain:'vision',  domainLabel:'Computer Vision', size:'5.48M params',      accuracyScore:74, speedScore:90, explainability:'Medium',     explainClass:'mid',  explainScore:55, fit:'Mobile and embedded image classification.' },
+    { name:'EfficientNet B0', domain:'vision',  domainLabel:'Computer Vision', size:'5.29M params',      accuracyScore:80, speedScore:74, explainability:'Medium',     explainClass:'mid',  explainScore:55, fit:'Balanced production vision tasks.' },
+    { name:'LightGBM',        domain:'tabular', domainLabel:'Tabular Data',    size:'Dataset-dependent', accuracyScore:84, speedScore:92, explainability:'High',       explainClass:'good', explainScore:90, fit:'Business analytics, forecasting, risk, and structured data.' }
+  ];
+
+  const domainStyle = {
+    nlp:     { bg:'var(--nlp-bg)',     border:'var(--nlp-border)',     color:'var(--nlp-text)' },
+    vision:  { bg:'var(--vision-bg)',  border:'var(--vision-border)',  color:'var(--vision-text)' },
+    tabular: { bg:'var(--tabular-bg)', border:'var(--tabular-border)', color:'var(--tabular-text)' }
+  };
+  const domainColor = { nlp:'#5ba4f5', vision:'#4dd9f0', tabular:'#a67ff5' };
+
+  let selectedDomain = 'all', selectedCard = null;
+
+  function renderCards() {
+    const grid = document.getElementById('cards-grid');
+    const list = selectedDomain === 'all' ? models : models.filter(m => m.domain === selectedDomain);
+    grid.innerHTML = list.map(m => {
+      const ds = domainStyle[m.domain];
+      return `
+      <div class="model-card" data-name="${m.name}" onclick="selectCard(this,'${m.name}')">
+        <div class="card-top">
+          <div class="model-name">${m.name}</div>
+          <span class="domain-pill" style="background:${ds.bg};border-color:${ds.border};color:${ds.color}">${m.domainLabel}</span>
+        </div>
+        <div class="model-size">${m.size}</div>
+        <div class="metrics">
+          <div class="metric-row">
+            <div class="metric-top">
+              <span class="metric-lbl">Accuracy</span>
+              <span class="metric-score" style="color:#5ba4f5">${m.accuracyScore}/100</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${m.accuracyScore}%;background:#5ba4f5"></div></div>
+          </div>
+          <div class="metric-row">
+            <div class="metric-top">
+              <span class="metric-lbl">Speed</span>
+              <span class="metric-score" style="color:#4dfaa0">${m.speedScore}/100</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${m.speedScore}%;background:#4dfaa0"></div></div>
+          </div>
+        </div>
+        <div class="explain-row">
+          <span class="explain-lbl">Explainability</span>
+          <span class="explain-badge explain-${m.explainClass}">${m.explainability}</span>
+        </div>
+        <div class="card-divider"></div>
+        <div class="card-fit">${m.fit}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function selectCard(el, name) {
+    document.querySelectorAll('.model-card').forEach(c => c.classList.remove('selected'));
+    if (selectedCard === name) { selectedCard = null; }
+    else { el.classList.add('selected'); selectedCard = name; }
+  }
+
+  document.getElementById('domain-chips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    selectedDomain = chip.dataset.domain;
+    selectedCard = null;
+    renderCards();
+  });
+
+  renderCards();
+
+  const gc = 'rgba(255,255,255,0.06)', tc = '#3d5a75';
+
+  new Chart(document.getElementById('bubbleChart'), {
+    type: 'bubble',
+    data: {
+      datasets: models.map(m => ({
+        label: m.name,
+        data: [{ x: m.accuracyScore, y: m.speedScore, r: Math.round(m.explainScore / 11) + 5 }],
+        backgroundColor: domainColor[m.domain] + '44',
+        borderColor: domainColor[m.domain],
+        borderWidth: 1.5
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top:16, right:16 } },
+      scales: {
+        x: { min:20, max:100, title:{ display:true, text:'Accuracy', color:tc, font:{size:10,family:"'Space Mono',monospace"} }, ticks:{ color:tc, font:{size:10} }, grid:{ color:gc } },
+        y: { min:20, max:100, title:{ display:true, text:'Speed', color:tc, font:{size:10,family:"'Space Mono',monospace"} }, ticks:{ color:tc, font:{size:10} }, grid:{ color:gc } }
+      },
+      plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: c => `${c.dataset.label}: acc ${c.parsed.x} · spd ${c.parsed.y}` } } }
+    }
+  });
+
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: models.map(m => m.name),
+      datasets: [
+        { label:'Accuracy', data:models.map(m=>m.accuracyScore), backgroundColor:'#5ba4f530', borderColor:'#5ba4f5', borderWidth:1.5, borderRadius:4 },
+        { label:'Speed',    data:models.map(m=>m.speedScore),    backgroundColor:'#4dfaa030', borderColor:'#4dfaa0', borderWidth:1.5, borderRadius:4 }
+      ]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      scales: {
+        x: { min:0, max:100, ticks:{ color:tc, font:{size:10} }, grid:{ color:gc } },
+        y: { ticks:{ color:'#7a9dbf', font:{size:10,family:"'Space Mono',monospace"} }, grid:{ color:'transparent' } }
+      },
+      plugins: { legend:{ display:false }, tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${c.parsed.x}/100` } } }
+    }
+  });
+</script>
+</body>
+</html>
