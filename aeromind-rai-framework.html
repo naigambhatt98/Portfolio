@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AeroMind Robotics Responsible AI Framework</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-soft: #0d1b2f;
+      --card: rgba(255, 255, 255, 0.075);
+      --card-strong: rgba(255, 255, 255, 0.12);
+      --text: #f8fafc;
+      --muted: #b6c4d8;
+      --accent: #22d3ee;
+      --accent-2: #14b8a6;
+      --gold: #fbbf24;
+      --border: rgba(255, 255, 255, 0.14);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(34, 211, 238, 0.22), transparent 32rem),
+        radial-gradient(circle at top right, rgba(20, 184, 166, 0.18), transparent 28rem),
+        linear-gradient(135deg, #07111f 0%, #0f172a 52%, #082f49 100%);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page-shell {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 28px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      letter-spacing: 0.02em;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow);
+    }
+
+    .back-link {
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.06);
+      transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .back-link:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.11);
+      border-color: rgba(34, 211, 238, 0.45);
+    }
+
+    .hero {
+      padding: 70px 0 54px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 42px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      background: rgba(34, 211, 238, 0.08);
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      font-size: clamp(2.55rem, 6vw, 5.2rem);
+      line-height: 0.98;
+      letter-spacing: -0.07em;
+      margin-bottom: 24px;
+    }
+
+    .hero-lead {
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      max-width: 760px;
+      margin-bottom: 30px;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 13px 18px;
+      border-radius: 15px;
+      font-weight: 800;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: #06202b;
+      box-shadow: 0 18px 40px rgba(34, 211, 238, 0.24);
+    }
+
+    .button.secondary {
+      color: var(--text);
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero-panel {
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 28px;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.04)),
+        radial-gradient(circle at top right, rgba(251, 191, 36, 0.15), transparent 14rem);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.25), transparent, rgba(251, 191, 36, 0.18));
+      opacity: 0.7;
+      pointer-events: none;
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask-composite: exclude;
+      padding: 1px;
+      border-radius: 28px;
+    }
+
+    .shield {
+      width: 88px;
+      height: 88px;
+      display: grid;
+      place-items: center;
+      border-radius: 26px;
+      background: rgba(34, 211, 238, 0.13);
+      border: 1px solid rgba(34, 211, 238, 0.28);
+      font-size: 2.7rem;
+      margin-bottom: 28px;
+    }
+
+    .panel-title {
+      font-size: 1.35rem;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-text {
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .mini-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .mini-metric {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.13);
+    }
+
+    .mini-metric strong {
+      display: block;
+      color: var(--accent);
+      font-size: 1.15rem;
+    }
+
+    .mini-metric span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    section {
+      padding: 42px 0;
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      font-size: clamp(1.75rem, 3vw, 2.7rem);
+      line-height: 1.08;
+      letter-spacing: -0.045em;
+    }
+
+    .section-note {
+      color: var(--muted);
+      max-width: 560px;
+    }
+
+    .content-card {
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 28px;
+      background: var(--card);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(12px);
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+    }
+
+    .body-copy p {
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .body-copy p:last-child {
+      margin-bottom: 0;
+    }
+
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .tag {
+      border: 1px solid rgba(34, 211, 238, 0.24);
+      color: #d9fbff;
+      background: rgba(34, 211, 238, 0.08);
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .framework-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .framework-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.045);
+    }
+
+    .framework-item .icon {
+      color: var(--gold);
+      font-weight: 900;
+      margin-top: 1px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .focus-card {
+      min-height: 210px;
+      padding: 22px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: linear-gradient(155deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.045));
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .focus-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(34, 211, 238, 0.42);
+    }
+
+    .focus-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(34, 211, 238, 0.1);
+      margin-bottom: 18px;
+      font-size: 1.45rem;
+    }
+
+    .focus-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+    }
+
+    .focus-card p {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .pdf-section {
+      border: 1px solid rgba(34, 211, 238, 0.24);
+      background:
+        radial-gradient(circle at top left, rgba(34, 211, 238, 0.17), transparent 20rem),
+        rgba(255, 255, 255, 0.07);
+      border-radius: 30px;
+      padding: 34px;
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 28px;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .pdf-preview {
+      min-height: 330px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(135deg, rgba(15, 23, 42, 0.3), rgba(20, 184, 166, 0.14)),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 24px);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 28px;
+    }
+
+    .pdf-preview .doc-icon {
+      font-size: 5rem;
+      margin-bottom: 12px;
+    }
+
+    .pdf-preview strong {
+      display: block;
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+
+    .pdf-preview span {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .pdf-copy h2 {
+      margin-bottom: 16px;
+    }
+
+    .pdf-copy p {
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .file-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .reflection {
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .reflection p {
+      color: var(--muted);
+      margin-top: 14px;
+    }
+
+    footer {
+      padding: 42px 0 54px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.95rem;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fadeIn 0.7s ease forwards;
+    }
+
+    .delay-1 {
+      animation-delay: 0.08s;
+    }
+
+    .delay-2 {
+      animation-delay: 0.16s;
+    }
+
+    .delay-3 {
+      animation-delay: 0.24s;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 920px) {
+      .hero,
+      .overview-grid,
+      .pdf-section {
+        grid-template-columns: 1fr;
+      }
+
+      .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page-shell {
+        width: min(100% - 28px, 1120px);
+      }
+
+      .top-nav {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .hero {
+        padding-top: 40px;
+      }
+
+      .mini-metrics,
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pdf-section,
+      .content-card {
+        padding: 22px;
+      }
+
+      .action-row {
+        width: 100%;
+      }
+
+      .button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <nav class="top-nav" aria-label="Page navigation">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">NB</span>
+        <span>Naigam Bhatt Portfolio</span>
+      </a>
+      <a class="back-link" href="index.html">Back to Portfolio</a>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy fade-in">
+          <div class="eyebrow">Responsible AI Portfolio Artifact</div>
+          <h1>AeroMind Robotics Responsible AI Framework</h1>
+          <p class="hero-lead">
+            A final integrated Responsible AI plan for a fictional aerospace robotics company, designed to turn ethical AI principles into practical governance, lifecycle controls, training, risk review, and long-term accountability.
+          </p>
+          <div class="action-row">
+            <a class="button primary" href="assets/AeroMind%20Robotics%20Final%20Integrated%20RAI%20Plan.pdf" target="_blank" rel="noopener">View Slides as PDF</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel fade-in delay-1" aria-label="Framework summary">
+          <div class="shield">🛡️</div>
+          <h2 class="panel-title">Built for high-stakes AI use</h2>
+          <p class="panel-text">
+            The framework focuses on AI-supported robotic sanding, computer vision defect detection, predictive maintenance, and operator training in aerospace maintenance environments.
+          </p>
+          <div class="mini-metrics">
+            <div class="mini-metric">
+              <strong>18+</strong>
+              <span>Framework areas covered</span>
+            </div>
+            <div class="mini-metric">
+              <strong>10+</strong>
+              <span>Priority references</span>
+            </div>
+            <div class="mini-metric">
+              <strong>7</strong>
+              <span>Lifecycle stages</span>
+            </div>
+            <div class="mini-metric">
+              <strong>RAI</strong>
+              <span>Governance model</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section>
+        <div class="section-heading">
+          <h2 class="fade-in">What this artifact includes</h2>
+          <p class="section-note fade-in delay-1">
+            The page is intentionally focused on the final framework and the PDF slides, without extra portfolio elements.
+          </p>
+        </div>
+
+        <div class="overview-grid">
+          <div class="content-card body-copy fade-in">
+            <p>
+              This project presents a complete Responsible AI framework for AeroMind Robotics, a fictional aerospace robotics company developing AI-supported systems for maintenance, inspection, quality assurance, and operator support.
+            </p>
+            <p>
+              The framework combines ethical principles, governance structure, roles and responsibilities, accountability timelines, employee training, RAI metrics, AI lifecycle controls, risk evaluation, privacy and compliance review, user education, long-term impact evaluation, and disposition planning.
+            </p>
+            <div class="tag-cloud">
+              <span class="tag">Responsible AI</span>
+              <span class="tag">AI Governance</span>
+              <span class="tag">Aerospace Robotics</span>
+              <span class="tag">Risk Management</span>
+              <span class="tag">Human Oversight</span>
+            </div>
+          </div>
+
+          <div class="content-card fade-in delay-1">
+            <div class="framework-list">
+              <div class="framework-item"><span class="icon">01</span><span>Ethical principles statement for safety, fairness, privacy, accountability, and transparency.</span></div>
+              <div class="framework-item"><span class="icon">02</span><span>Governance structure with review board oversight, ownership, monitoring, and escalation.</span></div>
+              <div class="framework-item"><span class="icon">03</span><span>Risk guidelines for explainability, data bias, privacy, compliance, user training, and long-term impact.</span></div>
+              <div class="framework-item"><span class="icon">04</span><span>Lifecycle controls from ideation through deployment, monitoring, maintenance, and disposition.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-heading">
+          <h2 class="fade-in">Core framework areas</h2>
+          <p class="section-note fade-in delay-1">
+            Each area is meant to be actionable, measurable, and relevant to robotics and computer vision systems.
+          </p>
+        </div>
+
+        <div class="cards-grid">
+          <article class="focus-card fade-in">
+            <div class="focus-icon">🏛️</div>
+            <h3>Governance</h3>
+            <p>Defines executive oversight, RAI review responsibilities, product ownership, and end-user feedback channels.</p>
+          </article>
+
+          <article class="focus-card fade-in delay-1">
+            <div class="focus-icon">🔁</div>
+            <h3>Lifecycle Controls</h3>
+            <p>Maps RAI actions across ideation, data collection, development, testing, deployment, monitoring, and retirement.</p>
+          </article>
+
+          <article class="focus-card fade-in delay-2">
+            <div class="focus-icon">⚖️</div>
+            <h3>Bias &amp; Fairness</h3>
+            <p>Addresses dataset balance, sensor angle variation, lighting conditions, labeling disagreement, and performance gaps.</p>
+          </article>
+
+          <article class="focus-card fade-in delay-3">
+            <div class="focus-icon">🔐</div>
+            <h3>Privacy &amp; Compliance</h3>
+            <p>Covers data minimization, access control, retention, audit logs, customer contract needs, and export control awareness.</p>
+          </article>
+
+          <article class="focus-card fade-in">
+            <div class="focus-icon">👥</div>
+            <h3>Training</h3>
+            <p>Includes role-based RAI training for executives, engineers, ML teams, operators, and customer support teams.</p>
+          </article>
+
+          <article class="focus-card fade-in delay-1">
+            <div class="focus-icon">📊</div>
+            <h3>Metrics</h3>
+            <p>Uses measurable controls for safety, reliability, fairness, privacy, training completion, and governance documentation.</p>
+          </article>
+
+          <article class="focus-card fade-in delay-2">
+            <div class="focus-icon">🧭</div>
+            <h3>User Education</h3>
+            <p>Defines limitations, trust signals, human override procedures, misuse reporting, and feedback loops.</p>
+          </article>
+
+          <article class="focus-card fade-in delay-3">
+            <div class="focus-icon">🌱</div>
+            <h3>Long-Term Impact</h3>
+            <p>Evaluates effects on employees, customers, skill development, workload, safety, reliability, and trust.</p>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <div class="pdf-section fade-in">
+          <div class="pdf-preview">
+            <div>
+              <div class="doc-icon">📄</div>
+              <strong>Final Integrated RAI Plan</strong>
+              <span>Available as a PDF slide deck</span>
+            </div>
+          </div>
+
+          <div class="pdf-copy">
+            <h2>View the final slides</h2>
+            <p>
+              The PDF contains the full presentation version of the framework, including the ethical principles statement, governance model, roles and responsibilities, training plan, lifecycle overview, metrics dashboard, risk evaluation guidelines, implementation checklist, and prioritized references.
+            </p>
+            <div class="action-row">
+              <a class="button primary" href="assets/AeroMind%20Robotics%20Final%20Integrated%20RAI%20Plan.pdf" target="_blank" rel="noopener">View PDF</a>
+            </div>
+            <p class="file-note">
+              Place the exported PDF in the assets folder using this exact file name: AeroMind Robotics Final Integrated RAI Plan.pdf
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="reflection content-card fade-in">
+          <h2>Reflection</h2>
+          <p>
+            This project connects robotics and computer vision engineering with the responsibility of building AI systems that are safe, explainable, fair, and useful over time. In high-stakes robotics environments, performance alone is not enough. AI systems also need clear ownership, documented limits, measurable controls, user training, monitoring, and a plan for retraining or retirement when they no longer serve their purpose.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2025 Naigam Bhatt • AeroMind Robotics Responsible AI Framework</p>
+    </footer>
+  </div>
+</body>
+</html>
